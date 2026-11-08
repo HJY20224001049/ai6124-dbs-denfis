@@ -1,0 +1,20 @@
+{
+  "D05_SI": {
+    "rows": 4219,
+    "first": "2010-01-04",
+    "last": "2026-10-30",
+    "start_close": 13.909090042114258,
+    "end_close": 73.12999725341797,
+    "max_abs_return": 0.09743716497929385,
+    "max_abs_return_date": "2025-04-07",
+    "positive_days_pct": 50.61640587956377,
+    "annualized_vol_pct": 18.398768469378695,
+    "zero_volume_rows": 0
+  },
+  "^STI": {
+    "rows": 4210,
+    "first": "2010-01-04",
+    "last": "2026-10-30",
+    "zero_volume_rows": 1085
+  }
+}

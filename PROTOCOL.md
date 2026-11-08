@@ -1,7 +1,7 @@
 # AI6124 Group 18 · 项目统一协议
 
-**版本**：v1.0（草案，待双方确认）
-**状态**：确认后冻结；冻结后任何修改需双方同意、升版本，并重跑受影响的结果
+**版本**：v1.1（v1.0 已按建议冻结；v1.1 为 XGBoost 正则化修订，待 A 确认）
+**状态**：冻结后任何修改需双方同意、升版本，并重跑受影响的结果
 **适用范围**：全部代码、实验、Notebook、Slides
 **项目**：DBS Group Holdings (D05.SI) 次日收益预测 — DENFIS vs XGBoost / LSTM
 
@@ -24,18 +24,20 @@
 | 标的 | `D05.SI`（DBS Group Holdings，SGX 银行股） |
 | 期间 | 2010-01-01 至 2026-10-31（含） |
 | 频率 | 日线，按 SGX 实际交易日 |
-| 来源 | Yahoo Finance via `yfinance` |
+| 来源 | Yahoo Finance chart API（字段与 `yfinance` 一致） |
 | 字段 | Open, High, Low, Close, Adj Close, Volume |
 | 价格口径 | `auto_adjust=False`；**收益与全部价格类指标一律用 `Adj Close`**，`Close` 只用于展示 |
 | 收益口径 | 总回报（含股息再投资），按 Adj Close 计算 |
 | 时区/索引 | Asia/Singapore；索引为无时区的日期（`YYYY-MM-DD`），升序 |
-| 清洗 | 去重复日期；删除 OHLCV 缺失或 `Volume <= 0` 的行；**不 forward fill** |
+| 清洗 | 去重复日期；删除 OHLCV 缺失或 `Volume <= 0` 的行；`^STI` 为指数，豁免 Volume 过滤；**不 forward fill** |
 | 异常检查 | 单日 `|r_t| > 0.5` 必须人工核对，确认不是拆股/分红导致的错误 |
 | 缓存 | `data/raw/D05_SI.csv`、`data/raw/STI.csv`；提交进仓库 |
 | 校验 | `data/checksums.txt` 记录两个文件的 SHA256；最终 Notebook 启动时校验 |
 | 迁移学习数据 | `^STI`，同期间、同清洗规则，只用于迁移学习实验 |
 
 **数据下载只做一次**：由 B 在 11/08 完成并提交缓存。之后所有人只读缓存，不在 Notebook 里实时下载。
+
+> 实现说明：当前 Python 3.9 环境装不上新版 `yfinance`（它要求 `curl_cffi>=0.17`，没有 3.9 wheel），所以 `src/data.py` 直接调用 Yahoo chart endpoint，返回同样的 OHLCV 与 `Adj Close`。下载结果已缓存为 CSV，最终 Notebook 不需要网络。
 
 > yfinance 注意：单标的下载可能返回 MultiIndex 列，落地前压平；`Adj Close` 必须存在，否则改用 `auto_adjust=True` 并把 `Close` 当调整后价格，同时在 README 记录这次口径变更。
 
@@ -199,13 +201,16 @@ class OnlinePredictor(Predictor, Protocol):
 
 | 参数 | 搜索范围 |
 |---|---|
-| `max_depth` | {3, 4, 5} |
-| `learning_rate` | {0.03, 0.05, 0.1} |
+| `max_depth` | {2, 3} |
+| `learning_rate` | {0.01, 0.03} |
+| `min_child_weight` | {5, 30} |
+| `reg_lambda` | {1.0, 5.0} |
 | `n_estimators` | 最多 1000，验证段 early stopping 50 |
 | `subsample` / `colsample_bytree` | 0.8 / 0.8 |
-| `min_child_weight` / `reg_lambda` | 5 / 1.0 |
 
-共 9 组，按验证段 RMSE 选择。
+共 16 组，按验证段 RMSE 选择。
+
+> v1.1 修订原因：原网格（depth 3–5、lr 0.03–0.1、固定 `min_child_weight=5`、`reg_lambda=1`）在 2016 验证段上第 1 棵树后误差立即上升，早停退化为 1 棵树、预测近似常数。加强正则化后，验证误差在 100+ 棵树处才见底，baseline 才有比较意义。
 
 **LSTM**
 
@@ -513,4 +518,5 @@ project/
 
 | 版本 | 日期 | 变更 | 确认 |
 |---|---|---|---|
-| v1.0 | 2026-11-08 | 初稿 | 待双方确认 |
+| v1.0 | 2026-11-08 | 初稿，按建议冻结 | 双方已确认 |
+| v1.1 | 2026-11-08 | B 提议：XGBoost 改为强正则搜索空间（depth 2/3、lr 0.01/0.03、`min_child_weight` 5/30、`reg_lambda` 1/5），避免早停退化为 1 棵树 | 待 A 确认；确认前代码按 v1.1 执行 |

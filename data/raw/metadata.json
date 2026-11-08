@@ -1,0 +1,26 @@
+{
+  "source": "Yahoo Finance chart API",
+  "downloaded_at": "2026-11-08T06:34:55.108771+00:00",
+  "start": "2010-01-01",
+  "end": "2026-10-31",
+  "series": {
+    "D05_SI": {
+      "symbol": "D05.SI",
+      "rows": 4219,
+      "first_date": "2010-01-04",
+      "last_date": "2026-10-30",
+      "is_index": false
+    },
+    "STI": {
+      "symbol": "^STI",
+      "rows": 4210,
+      "first_date": "2010-01-04",
+      "last_date": "2026-10-30",
+      "is_index": true
+    }
+  },
+  "sha256": {
+    "D05_SI.csv": "d73207ac25cfdd99e87e68411087c7b2c0b8ece236fe0f8474c3d6e292cdc3b9",
+    "STI.csv": "19e0c8dd0245ea00d3c65d89f3bc19c8e87d8becaba0168b376a95a4c8cc6723"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "n": 250,
+  "rmse": 0.011337663478282889,
+  "mae": 0.008671986077438442,
+  "r2": 0.0014478293398191289,
+  "ic": 0.15154878829633686,
+  "da": 0.484,
+  "da5": 0.5,
+  "sharpe": 0.5349134944593518,
+  "ann_ret": 0.08352808913738374,
+  "max_dd": 0.19119922991308336,
+  "turnover": 0.004,
+  "exposure": 1.0,
+  "cum_return": 0.08283844128148932,
+  "model": "xgboost",
+  "fold_id": "r2f3",
+  "rep": 2,
+  "fold": 3,
+  "test_year": 2022,
+  "tau": 0.0,
+  "seed": 144,
+  "params": {
+    "max_depth": 3,
+    "learning_rate": 0.03,
+    "min_child_weight": 30,
+    "reg_lambda": 1.0,
+    "n_estimators": 1
+  }
+}

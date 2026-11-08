@@ -18,11 +18,45 @@ ECM online clustering → first-order TSK fuzzy rules → weighted RLS consequen
 ## Status
 
 - [x] Proposal submitted (2026-10-14)
-- [ ] Data pipeline and cached data
+- [x] Data pipeline and cached data (D05.SI 4,219 rows; ^STI 4,210 rows)
+- [x] 13-feature, 9-fold walk-forward, metrics and backtest modules, 22 tests
+- [x] XGBoost and LSTM baselines on all 9 folds
+- [x] Buy-and-hold comparison, leakage audit (97 checks, 0 failures)
 - [ ] DENFIS implementation (frozen + online)
-- [ ] XGBoost / LSTM baselines
-- [ ] 3×3 walk-forward evaluation
 - [ ] Final notebook and slides (due 2026-11-18 23:59)
+
+Current pooled result (2017–2025, 10 bp one-way cost):
+
+| model | RMSE | direction acc. | Sharpe | max drawdown | exposure |
+|---|---|---|---|---|---|
+| XGBoost | 0.0120 | 0.508 | 0.238 | 32.2% | 53.6% |
+| LSTM | 0.0120 | 0.485 | 0.407 | 27.5% | 30.7% |
+| buy & hold | — | — | 1.113 | 38.6% | 100% |
+
+Both models have R² below zero and directional accuracy near 50%. They reduce
+drawdown but give up most of the upside versus buy & hold. This is the honest
+starting point for the DENFIS comparison, not a result to overclaim.
+
+The 2026 holdout is kept untouched until results are frozen.
+
+## Quick start
+
+```bash
+python -m src.data                                  # download and cache data
+python scripts/eda.py                               # EDA figures
+python scripts/check_pipeline.py                    # feature/fold sanity check
+python -m pytest -q                                 # contract tests
+python scripts/run_baseline.py --model xgboost --folds all
+python scripts/run_baseline.py --model lstm --folds all
+python scripts/run_baseline.py --model xgboost --folds r1f1   # one fold
+python scripts/make_results_table.py                # docs/results_table.md
+python scripts/plot_results.py                      # equity and DA figures
+python scripts/leakage_audit.py                     # docs/leakage_audit.md
+```
+
+Data are downloaded from the Yahoo Finance chart endpoint (the same daily
+OHLCV and adjusted-close fields returned by `yfinance`); the cache is what the
+final notebook reads. No network access is needed after `python -m src.data`.
 
 ## Repository layout
 
