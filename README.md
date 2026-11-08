@@ -8,12 +8,11 @@ ECM online clustering → first-order TSK fuzzy rules → weighted RLS consequen
 - LIN Jingzhao
 - HU Junyu
 
-## Project documents
+## Documentation
 
 - [Unified protocol](PROTOCOL.md) — data, features, folds, model interface, evaluation, artifacts
-- [Workplan A — method](WORKPLAN_A.md)
-- [Workplan B — data & evaluation](WORKPLAN_B.md)
-- [Project plan](project_plan.html)
+
+Internal workplans and the course proposal are kept out of this repository.
 
 ## Status
 
