@@ -1,0 +1,20 @@
+# Course source materials — not part of the project deliverables
+AI6124 - week 8 - Neural in Neuro-Fuzzy Systems.pdf
+任务要求.pdf
+
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+venv/
+.env
+.pytest_cache/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+~$*
+
+# Temporary
+_tmp_pages/

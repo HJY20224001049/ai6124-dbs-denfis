@@ -1,0 +1,516 @@
+<title>DBS 股价预测项目计划</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600&display=swap">
+<style>
+  /* 设计：苔绿纸面 + 松柏绿强调，衬线中文标题 + 无衬线正文 + 等宽数据 */
+  :root {
+    --bg: #F4F6F4;
+    --surface: #FFFFFF;
+    --surface-2: #EAEFEB;
+    --ink: #16211E;
+    --muted: #5A6964;
+    --line: #D5DDD7;
+    --accent: #0E6B5A;
+    --accent-ink: #0A4E42;
+    --accent-soft: #E2EFEA;
+    --warn: #94510F;
+    --warn-soft: #F3E6D4;
+    --code-bg: #EDF1EC;
+    --shadow: 0 1px 2px rgba(22, 33, 30, .05), 0 10px 30px rgba(22, 33, 30, .05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0D1311;
+      --surface: #141C19;
+      --surface-2: #1B2622;
+      --ink: #E6EDE8;
+      --muted: #9AA9A3;
+      --line: #2A3732;
+      --accent: #63C4AE;
+      --accent-ink: #93DACB;
+      --accent-soft: #17302A;
+      --warn: #E0A15E;
+      --warn-soft: #2B2117;
+      --code-bg: #1B2622;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 30px rgba(0, 0, 0, .25);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0D1311;
+    --surface: #141C19;
+    --surface-2: #1B2622;
+    --ink: #E6EDE8;
+    --muted: #9AA9A3;
+    --line: #2A3732;
+    --accent: #63C4AE;
+    --accent-ink: #93DACB;
+    --accent-soft: #17302A;
+    --warn: #E0A15E;
+    --warn-soft: #2B2117;
+    --code-bg: #1B2622;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 30px rgba(0, 0, 0, .25);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.75;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 1060px; margin: 0 auto; padding-block: 44px 84px; }
+  a { color: var(--accent-ink); }
+  a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+
+  /* 页头 */
+  header { border-bottom: 1px solid var(--line); padding-bottom: 28px; }
+  .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12px; letter-spacing: .12em; color: var(--accent);
+    margin: 0 0 12px; font-weight: 500;
+  }
+  h1 {
+    font-family: "Noto Serif SC", "Songti SC", serif;
+    font-size: clamp(30px, 5vw, 44px);
+    line-height: 1.25; letter-spacing: -.01em;
+    margin: 0 0 10px; text-wrap: balance;
+  }
+  .sub {
+    margin: 0; color: var(--muted); font-size: 16.5px; max-width: 68ch;
+  }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid var(--line); background: var(--surface);
+    border-radius: 999px; padding: 3px 11px;
+    font-size: 12.5px; color: var(--muted); white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .chip strong { color: var(--ink); font-weight: 500; }
+  .chip.hot { border-color: color-mix(in srgb, var(--warn) 40%, var(--line)); background: var(--warn-soft); color: var(--warn); }
+  .chip.hot strong { color: var(--warn); }
+
+  /* 区块 */
+  section { margin-top: 54px; }
+  .section-head { margin-bottom: 18px; }
+  .section-head .eyebrow { margin-bottom: 6px; }
+  h2 {
+    font-family: "Noto Serif SC", "Songti SC", serif;
+    font-size: clamp(21px, 3vw, 27px); line-height: 1.35;
+    margin: 0; letter-spacing: -.005em; text-wrap: balance;
+  }
+  .lede { color: var(--muted); margin: 8px 0 0; max-width: 72ch; font-size: 15.5px; }
+  p { margin: 0 0 12px; }
+  .muted { color: var(--muted); }
+  .small { font-size: 13.5px; }
+
+  /* 关键判断 */
+  .callout {
+    margin-top: 32px; background: var(--surface);
+    border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius: 10px; padding: 4px 20px; box-shadow: var(--shadow);
+  }
+  .callout .item { padding: 15px 0; border-bottom: 1px solid var(--line); }
+  .callout .item:last-child { border-bottom: 0; }
+  .callout .k { font-weight: 700; color: var(--ink); }
+  .callout .item p { margin: 2px 0 0; color: var(--muted); font-size: 15px; }
+  .callout .item p strong { color: var(--ink); font-weight: 500; }
+
+  /* 表格 */
+  .table-wrap {
+    overflow-x: auto; border: 1px solid var(--line); border-radius: 10px;
+    background: var(--surface); box-shadow: var(--shadow);
+  }
+  table { width: 100%; border-collapse: collapse; min-width: 680px; }
+  th, td { text-align: left; vertical-align: top; padding: 11px 14px; }
+  thead th {
+    font-size: 12.5px; font-weight: 500; color: var(--muted);
+    background: var(--surface-2); border-bottom: 1px solid var(--line);
+    white-space: nowrap; letter-spacing: .02em;
+  }
+  tbody td { border-bottom: 1px solid var(--line); font-size: 14.5px; line-height: 1.65; }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover td { background: color-mix(in srgb, var(--accent-soft) 34%, transparent); }
+  td.num, th.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .tag {
+    display: inline-block; font-size: 12px; line-height: 1.5;
+    border-radius: 4px; padding: 0 6px; white-space: nowrap;
+    border: 1px solid var(--line); color: var(--muted); background: var(--bg);
+  }
+  .tag.a { color: var(--accent-ink); background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, var(--line)); }
+  .tag.b { color: var(--warn); background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 30%, var(--line)); }
+  .tag.both { color: var(--ink); background: var(--surface-2); }
+  td .tag + .tag { margin-left: 4px; }
+
+  /* 流程 */
+  .pipeline {
+    display: grid; grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 10px; margin-top: 20px;
+  }
+  .step {
+    background: var(--surface); border: 1px solid var(--line);
+    border-top: 2px solid var(--accent); border-radius: 8px;
+    padding: 13px 12px 14px; min-width: 0;
+  }
+  .step .n {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px; color: var(--accent); letter-spacing: .08em;
+  }
+  .step .t { font-weight: 700; font-size: 14.5px; margin-top: 2px; }
+  .step .d { color: var(--muted); font-size: 12.5px; line-height: 1.55; margin-top: 4px; }
+
+  /* 卡片 */
+  .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 10px; padding: 18px 20px; box-shadow: var(--shadow); min-width: 0;
+  }
+  .card h3 { margin: 0 0 6px; font-size: 16px; line-height: 1.4; }
+  .card .role {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11.5px; letter-spacing: .08em; color: var(--accent); margin-bottom: 6px;
+  }
+  .card ul { margin: 8px 0 0; padding-left: 18px; color: var(--muted); font-size: 14px; line-height: 1.7; }
+  .card li { margin: 2px 0; }
+  .card li strong { color: var(--ink); font-weight: 500; }
+  .card .total {
+    margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line);
+    font-size: 13px; color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* 代码 */
+  pre {
+    margin: 16px 0 0; background: var(--code-bg);
+    border: 1px solid var(--line); border-radius: 10px;
+    padding: 16px 18px; overflow-x: auto;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12.8px; line-height: 1.7; color: var(--ink);
+  }
+  code { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: .92em; }
+  .rule-list { margin: 14px 0 0; padding-left: 0; list-style: none; }
+  .rule-list li {
+    position: relative; padding-left: 18px; margin: 8px 0;
+    color: var(--muted); font-size: 14.5px;
+  }
+  .rule-list li::before {
+    content: ""; position: absolute; left: 2px; top: .68em;
+    width: 6px; height: 6px; border-radius: 1px; background: var(--accent);
+  }
+  .rule-list li strong { color: var(--ink); font-weight: 500; }
+
+  /* 检查清单 */
+  .check { margin: 14px 0 0; padding: 0; list-style: none; }
+  .check li {
+    position: relative; padding-left: 28px; margin: 9px 0;
+    font-size: 14.5px; color: var(--muted);
+  }
+  .check li::before {
+    content: ""; position: absolute; left: 0; top: .42em;
+    width: 14px; height: 14px; border: 1.5px solid var(--line);
+    border-radius: 3px; background: var(--surface);
+  }
+  .check li strong { color: var(--ink); font-weight: 500; }
+
+  .note {
+    margin-top: 18px; padding: 14px 18px; border-radius: 8px;
+    background: var(--warn-soft); border: 1px solid color-mix(in srgb, var(--warn) 28%, var(--line));
+    color: var(--muted); font-size: 14px;
+  }
+  .note strong { color: var(--warn); }
+
+  footer {
+    margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line);
+    color: var(--muted); font-size: 12.5px; line-height: 1.7;
+  }
+  footer p { margin: 0 0 4px; }
+
+  @media (max-width: 900px) {
+    .pipeline { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 680px) {
+    .page { padding-block: 30px 64px; }
+    section { margin-top: 42px; }
+    .grid-2 { grid-template-columns: 1fr; }
+    .pipeline { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .callout { padding: 2px 16px; }
+  }
+</style>
+
+<div class="page">
+  <header>
+    <p class="eyebrow">AI6124 NEURO EVOLUTION &amp; FUZZY INTELLIGENCE · GROUP 18</p>
+    <h1>DBS 股价预测项目计划</h1>
+    <p class="sub">用 DENFIS（演化神经模糊系统）预测新加坡银行股：10 天实施路线、双人分工与提交清单。</p>
+    <div class="meta">
+      <span class="chip hot">截止 <strong>2026-11-18 23:59</strong> · 剩余 10 天</span>
+      <span class="chip">成员 <strong>LIN JINGZHAO · HU JUNYU</strong></span>
+      <span class="chip">交付 <strong>Jupyter Notebook + Slides</strong></span>
+      <span class="chip">数据 <strong>D05.SI · 2010–2026</strong></span>
+    </div>
+  </header>
+
+  <div class="callout" role="note">
+    <div class="item">
+      <span class="k">时间比 proposal 里写的更紧。</span>
+      <p>Proposal 把分析放在 11 月 11 日之后，但截止就是 <strong>11 月 18 日</strong>。所以 11 月 13 日前三个模型必须跑通全部分折，之后停止改主线代码，只做分析、图表和写作。</p>
+    </div>
+    <div class="item">
+      <span class="k">评分不要求面面俱到，要求至少两个方向做得深。</span>
+      <p>建议押注 <strong>方法原创性</strong>（自己实现 DENFIS + 扩展）和 <strong>评估严谨性</strong>（3×3 walk-forward + 含成本回测）；迁移学习作为第三个加分方向。课程明确说：现成 ANFIS 代码得分较低，自己扩展成熟方法才有 bonus。</p>
+    </div>
+    <div class="item">
+      <span class="k">Proposal 有一处必须修正的矛盾。</span>
+      <p>正文写的是 <strong>DENFIS</strong>，但第 1–3 页的演讲者备注两次写成 <strong>Fuzzy-LSTM</strong>。最终 notebook、slides 和答辩口播稿全部统一为 DENFIS，否则会被追问到底做的是哪一个。</p>
+    </div>
+  </div>
+
+  <section>
+    <div class="section-head">
+      <p class="eyebrow">要求映射</p>
+      <h2>评分表的每一项，落到一个具体交付物</h2>
+      <p class="lede">九项 rubric 加示例代码的 Part 2–3 要求，逐条对应到产物和负责人，避免“做了但没写进 notebook”。</p>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th style="width:15%">评分项</th><th style="width:27%">要求</th><th style="width:44%">我们的交付</th><th style="width:14%">负责人</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>1 数据集</strong></td><td>说明数据类型、期间、来源</td><td>D05.SI 日线 2010–2026（约 4,218 根）；^STI 用于迁移学习；GDELT 语调作为加分特征。含 EDA、停牌与缺失检查。</td><td><span class="tag b">B</span></td></tr>
+          <tr><td><strong>2 混合 AI 方法</strong></td><td>不只写名字，要说明怎么用</td><td>从论文自行实现 DENFIS：ECM 在线聚类 → 高斯隶属度 → 一阶 TSK 规则 → RLS 结论参数；离线与在线两种模式；扩展规则合并与自适应遗忘因子。</td><td><span class="tag a">A</span></td></tr>
+          <tr><td><strong>3 文献综述</strong></td><td>按时间线引用论文，比较同类方法，形成 taxonomy</td><td>1993 ANFIS → 2002 DENFIS → 2004 eTS → 2008 SAFIS → 2014 PANFIS → 近年 Deep NFS；按在线/离线、规则生成、可解释性、计算成本列表比较。</td><td><span class="tag a">A</span><span class="tag b">B 补</span></td></tr>
+          <tr><td><strong>4 Benchmark</strong></td><td>合理切分、保持因果、指标正确</td><td>XGBoost + 原生 LSTM，同一输入与同一折；3 组 × 3 个一年测试折的 expanding walk-forward；RMSE、MAE、方向准确率、IC，以及收益、Sharpe、最大回撤。</td><td><span class="tag b">B</span></td></tr>
+          <tr><td><strong>5 Python 实现</strong></td><td>Jupyter Notebook、注释、可视化、可复现</td><td>单个 notebook 从上到下可跑：固定种子、数据本地缓存、每个模块有 markdown 解释和结果图，核心 DENFIS 代码内联展示。</td><td><span class="tag b">B 主</span><span class="tag a">A 审</span></td></tr>
+          <tr><td><strong>6 结果分析</strong></td><td>与 benchmark 和 SOTA 对比，讨论参数与优缺点</td><td>参数敏感性（Dthr、遗忘因子、阈值）、消融（有无规则合并/在线更新）、规则数与触发强度演化、统计检验、优缺点讨论。</td><td><span class="tag both">共同</span></td></tr>
+          <tr><td><strong>7 未来工作</strong></td><td>方法的研究方向与新应用</td><td>概念漂移检测、深度 NFS、多资产组合、情绪特征融合、在线学习的理论保证。</td><td><span class="tag a">A</span></td></tr>
+          <tr><td><strong>8 Slides</strong></td><td>组织质量、≤10 分钟、可选录音</td><td>与 rubric 一一对应的 10 分钟 deck；A 讲方法与文献，B 讲数据、结果与交易对比；可选录音。</td><td><span class="tag both">共同</span></td></tr>
+          <tr><td><strong>9 Bonus</strong></td><td>迁移学习或额外数据</td><td>^STI 预训练规则库 → DBS 上继续演化（zero-shot / fine-tune / scratch 三组对比）；GDELT 2.0 每日语调特征。</td><td><span class="tag a">A</span><span class="tag b">B</span></td></tr>
+          <tr><td><strong>示例代码 Part 2–3</strong></td><td>参数在训练集上选、再用于测试；训练初始模型；衡量预测；预测辅助盈利对比</td><td>交易阈值与超参数只在训练段选；含 10bp 成本的 long/flat 回测；有预测 vs 无预测（买入持有）组合对比。</td><td><span class="tag b">B</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <p class="eyebrow">技术路线</p>
+      <h2>一条主线，三种模型，统一的评估协议</h2>
+      <p class="lede">先把数据与评估骨架做出来，再让三个模型接同一个接口。这样任何模型的结果都能直接比较，也不会各写一套指标。</p>
+    </div>
+    <div class="pipeline">
+      <div class="step"><div class="n">01</div><div class="t">数据</div><div class="d">D05.SI OHLCV<br>2010–2026<br>本地缓存</div></div>
+      <div class="step"><div class="n">02</div><div class="t">特征</div><div class="d">对数收益、MA 比值、RSI14、MACD、布林 %B、波动率、成交量 z</div></div>
+      <div class="step"><div class="n">03</div><div class="t">切分</div><div class="d">初始 7 年训练；3 组 × 3 折；2026 留作盲测</div></div>
+      <div class="step"><div class="n">04</div><div class="t">模型</div><div class="d">DENFIS（主）<br>XGBoost<br>LSTM</div></div>
+      <div class="step"><div class="n">05</div><div class="t">信号与回测</div><div class="d">预测收益 &gt; 阈值做多，否则空仓；计 10bp 成本</div></div>
+      <div class="step"><div class="n">06</div><div class="t">分析与呈现</div><div class="d">指标对比、参数敏感性、规则解释、slides</div></div>
+    </div>
+
+    <div class="grid-3" style="margin-top:16px">
+      <div class="card">
+        <h3>数据与目标</h3>
+        <p class="small muted" style="margin:6px 0 0">目标是次日对数收益 <code>r<sub>t+1</sub> = ln(C<sub>t+1</sub>/C<sub>t</sub>)</code>，特征只用到 t 日为止的信息。方向标签由预测收益的符号给出，另设一个“不交易”死区。</p>
+        <ul>
+          <li>折内 z-score，只用训练段统计量</li>
+          <li>所有指标类特征都是因果的</li>
+          <li>折定义只写在 <code>config.py</code> 一处</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>DENFIS 实现要点</h3>
+        <p class="small muted" style="margin:6px 0 0">ECM 在标准化特征空间里增长/合并聚类；每个聚类对应一条一阶 TSK 规则；结论参数用加权 RLS（带遗忘因子）更新。</p>
+        <ul>
+          <li>ECM 半径 <code>Dthr</code> 是主敏感参数</li>
+          <li>先预测、再用已实现的当日收益更新</li>
+          <li>“冻结版”和“在线版”分开报告</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>评估协议</h3>
+        <p class="small muted" style="margin:6px 0 0">3 组 rolling-origin × 每組 3 个连续一年测试折，覆盖 2017–2025；2026 年 1–10 月完全不参与调参，作为最终盲测。</p>
+        <ul>
+          <li>回归：RMSE、MAE、R²、IC</li>
+          <li>方向：准确率（含死区版本）</li>
+          <li>组合：年化收益、Sharpe（√252）、最大回撤、换手</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>不要用 R² 当主指标。</strong> 日频收益接近不可预测，R² 为负是常态。主叙事放在方向准确率和含成本组合表现上，R² 如实报告即可；否则很容易把“正常结果”写成“模型失败”。
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <p class="eyebrow">时间表</p>
+      <h2>从今天到提交，按天切</h2>
+      <p class="lede">两条线并行，每晚一次 15 分钟同步。11 月 13 日是硬门槛：三个模型必须已经跑通全部 9 个折。</p>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th class="num" style="width:12%">日期</th><th style="width:30%">A · 方法线</th><th style="width:30%">B · 数据与评估线</th><th style="width:28%">当日里程碑</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="num"><strong>11/08 日</strong></td><td>读 DENFIS / ECM 原文，写 ECM 伪代码与单测计划；列文献清单</td><td>装 yfinance，下载并缓存 D05.SI 与 ^STI；EDA、缺失与停牌检查；建仓库</td><td>接口与折定义冻结；数据落盘</td></tr>
+          <tr><td class="num"><strong>11/09 一</strong></td><td>DENFIS 的 ECM + 高斯隶属度 + TSK 推理，合成数据单测</td><td>特征工程；因果折生成器；指标与回测骨架</td><td>晚上 <code>make_folds</code> / <code>evaluate</code> 可被调用</td></tr>
+          <tr><td class="num"><strong>11/10 二</strong></td><td>接上 RLS，跑通第一个折的预测</td><td>XGBoost 跑通首折；LSTM 骨架搭好</td><td>三个模型各有首折预测</td></tr>
+          <tr><td class="num"><strong>11/11 三</strong></td><td>第 13 周课 + project consultation：带架构图、折示意图、首折结果；问清在线更新如何界定</td><td>LSTM 调通并固定小模型配置（CPU）</td><td>方法可行性确认；问题清单当场问掉</td></tr>
+          <tr><td class="num"><strong>11/12 四</strong></td><td>在线演化、规则合并、自适应遗忘因子；参数初扫</td><td>LSTM 全折训练并缓存预测；CV runner 串联</td><td>DENFIS 冻结版可交付</td></tr>
+          <tr><td class="num"><strong>11/13 五</strong></td><td>Dthr / 遗忘因子扫描；可解释性图（规则数、隶属函数）</td><td>全部模型 9 折结果表；含成本回测；泄漏专项审计</td><td><strong>硬门槛：所有模型全折跑通</strong></td></tr>
+          <tr><td class="num"><strong>11/14 六</strong></td><td>迁移学习：^STI 预训练 → DBS 演化，三组对比</td><td>GDELT 语调特征（限时 4 小时，失败即放弃）</td><td>加分项有结论，无论正负</td></tr>
+          <tr><td class="num"><strong>11/15 日</strong></td><td>消融与敏感性收尾</td><td>有/无预测的交易对比；统计检验与置信区间</td><td>结果冻结，不再改实验</td></tr>
+          <tr><td class="num"><strong>11/16 一</strong></td><td>文献综述定稿（方法侧）</td><td>分析叙事与图表定稿</td><td>Notebook 开始集成</td></tr>
+          <tr><td class="num"><strong>11/17 二</strong></td><td>方法、文献、未来工作章节；slides 方法部分</td><td>Notebook 集成、全量重跑；slides 结果部分</td><td>按 rubric 逐条内部检查</td></tr>
+          <tr><td class="num"><strong>11/18 三</strong></td><td>最终复现与交叉审阅</td><td>新 kernel 从零运行；提交</td><td><strong>12:00 前提交，不留到 23:59</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <p class="eyebrow">分工</p>
+      <h2>两条工作线，各约 8.5 人日</h2>
+      <p class="lede">按“方法 / 数据与评估”切，而不是按 notebook 章节切，减少互相等待。下面的 A/B 只是工作线，建议按各自强项认领；若技能偏好相反，直接对调名字即可。</p>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="role">线 A · 方法与建模</div>
+        <h3>林靖朝（建议）</h3>
+        <ul>
+          <li><strong>DENFIS 核心</strong>：ECM 聚类、高斯隶属度、一阶 TSK、加权 RLS（约 3.5 天）</li>
+          <li><strong>方法扩展</strong>：在线演化、规则合并、自适应遗忘因子（1 天）</li>
+          <li><strong>消融与参数敏感性</strong>：Dthr、遗忘因子、规则数上限（0.5 天）</li>
+          <li><strong>可解释性</strong>：规则库、隶属函数、触发强度、典型规则解读（0.5 天）</li>
+          <li><strong>迁移学习</strong>：^STI → DBS 的三种协议对比（1 天）</li>
+          <li><strong>文献综述</strong>：演化模糊系统时间线 + taxonomy（1 天）</li>
+          <li><strong>方法写作与答辩</strong>（1 天）</li>
+        </ul>
+        <div class="total">合计约 8.5 人日 · 主笔第 2、3、7、9 项</div>
+      </div>
+      <div class="card">
+        <div class="role">线 B · 数据与评估</div>
+        <h3>胡俊宇（建议）</h3>
+        <ul>
+          <li><strong>数据管线</strong>：下载、缓存、EDA、特征工程（1.5 天）</li>
+          <li><strong>评估骨架</strong>：因果折生成器、指标、含成本回测（1.5 天）</li>
+          <li><strong>XGBoost baseline</strong>（0.5 天）</li>
+          <li><strong>LSTM baseline</strong>：小模型、早停、CPU 可跑（1 天）</li>
+          <li><strong>全折 CV runner</strong>：统一跑分、结果表与图（1 天）</li>
+          <li><strong>GDELT</strong>：语调特征，限时尝试（1 天，可放弃）</li>
+          <li><strong>结果分析与交易对比</strong>（1 天）</li>
+          <li><strong>Notebook 集成与可复现性 QA</strong>（1 天）</li>
+        </ul>
+        <div class="total">合计约 8.5 人日 · 主笔第 1、4、5、9 项</div>
+      </div>
+    </div>
+
+    <div class="table-wrap" style="margin-top:16px">
+      <table>
+        <thead>
+          <tr><th style="width:34%">交付物</th><th style="width:22%">A · 方法线</th><th style="width:22%">B · 评估线</th><th style="width:22%">说明</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>DENFIS 实现</td><td><span class="tag a">负责</span></td><td><span class="tag">审阅</span></td><td>B 用统一接口做黑盒测试</td></tr>
+          <tr><td>数据、特征、折定义</td><td><span class="tag">审阅</span></td><td><span class="tag b">负责</span></td><td>A 检查因果性</td></tr>
+          <tr><td>XGBoost / LSTM</td><td><span class="tag">审阅</span></td><td><span class="tag b">负责</span></td><td>超参只在训练段调</td></tr>
+          <tr><td>指标与回测</td><td><span class="tag">审阅</span></td><td><span class="tag b">负责</span></td><td>成本假设写入 markdown</td></tr>
+          <tr><td>迁移学习</td><td><span class="tag a">负责</span></td><td><span class="tag">配合</span></td><td>需要 B 的折与结果表</td></tr>
+          <tr><td>GDELT</td><td><span class="tag">配合</span></td><td><span class="tag b">负责</span></td><td>限时，失败可弃</td></tr>
+          <tr><td>文献综述</td><td><span class="tag a">主笔</span></td><td><span class="tag">补 ML/DL 对比</span></td><td>方法史由 A 写更连贯</td></tr>
+          <tr><td>结果分析</td><td><span class="tag both">方法/参数</span></td><td><span class="tag both">交易/统计</span></td><td>最后统一口吻</td></tr>
+          <tr><td>Notebook 集成</td><td><span class="tag">审阅</span></td><td><span class="tag b">负责</span></td><td>避免双人改 notebook</td></tr>
+          <tr><td>Slides</td><td><span class="tag both">方法 5 分钟</span></td><td><span class="tag both">结果 5 分钟</span></td><td>共同彩排一次</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <p class="eyebrow">协作约定</p>
+      <h2>接口先冻结，再各自实现</h2>
+      <p class="lede">两个人最容易浪费时间的地方是“结果对不上”和“notebook 冲突”。用同一份配置、同一套接口、统一的预测落盘格式来解决。</p>
+    </div>
+    <pre><code>config.py          # 目标定义、特征列、折区间、随机种子 —— 唯一真源
+data.py            # load_prices(symbol); build_features(df) -&gt; X, y; make_folds(...)
+models/denfis.py   # class DENFIS: fit / predict / partial_fit; n_rules_
+models/baselines.py# class XGBModel, LSTMModel —— 同样的 fit / predict
+eval/metrics.py    # rmse, mae, r2, dir_acc, ic
+eval/backtest.py   # make_signal(pred, tau); run_backtest(sig, ret, cost_bps)
+eval/cv.py         # run_cv(model_factory, folds) -&gt; results/preds_*.csv
+results/           # 只写不删：preds_{model}_{fold}.csv + summary.csv</code></pre>
+    <ul class="rule-list">
+      <li><strong>预测先落盘。</strong>训练和画图解耦，分析只读 <code>results/</code>，任何人重跑都能复现同一张表。</li>
+      <li><strong>测试段只在最终评估时打开。</strong>超参数、阈值、特征筛选全部在训练段或内层验证里决定。</li>
+      <li><strong>每个模块先写 10 行使用示例，再写实现。</strong>接口签字后再开工，避免互相等。</li>
+      <li><strong>Git 用功能分支 + PR。</strong>notebook 只由 B 在 11 月 16–17 日统一合并；开发期各写各的模块。</li>
+      <li><strong>数据缓存进仓库。</strong>CSV/parquet 只有几 MB，保证最终 notebook 离线可跑，不受 Yahoo 限流影响。</li>
+      <li><strong>每天 15 分钟同步。</strong>昨天完成什么、今天做什么、现在卡在哪里；卡住超过 2 小时就换方案。</li>
+    </ul>
+    <div class="note">
+      <strong>环境已检查：</strong>Python 3.9；torch 2.8.0 是 CPU 版；xgboost 2.1.4、scikit-learn 1.6.1 已装；<strong>yfinance 未安装</strong>，今天先 <code>pip install yfinance</code> 并缓存数据。LSTM 不要开大，hidden 16–32、窗口 20–30 足够。
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <p class="eyebrow">风险清单</p>
+      <h2>最可能拖垮进度的五件事</h2>
+      <p class="lede">每条都配了触发点和退路。触发点到了就执行退路，不要临场加需求。</p>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th style="width:22%">风险</th><th style="width:9%">影响</th><th style="width:52%">应对与退路</th><th style="width:17%">触发点</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>DENFIS 从零实现超期</strong></td><td><span class="tag b">高</span></td><td>先保证“ECM + 一阶 TSK + RLS”的最小闭环；规则合并、自适应遗忘因子属于增强，可砍。最小版仍是原创实现，符合加分方向。</td><td class="num">11/12 未出全折预测</td></tr>
+          <tr><td><strong>LSTM 在 CPU 上太慢</strong></td><td><span class="tag">中</span></td><td>hidden 16–32、序列 20–30、早停、只训练一次并缓存预测；必要时用 Colab GPU 跑一次后回填结果。</td><td class="num">单折 &gt; 10 分钟</td></tr>
+          <tr><td><strong>yfinance 拉不到数据</strong></td><td><span class="tag">中</span></td><td>今天就把数据缓存到本地；备用 Stooq 日线 CSV；最终 notebook 只读缓存，不依赖网络。</td><td class="num">11/08 下载失败</td></tr>
+          <tr><td><strong>GDELT 数据量大或接口不稳</strong></td><td><span class="tag">低（加分）</span></td><td>限时 4 小时。失败就在报告里如实写明并放弃，绝不影响主线实验。</td><td class="num">11/14 中午</td></tr>
+          <tr><td><strong>数据泄漏</strong></td><td><span class="tag b">高</span></td><td>11/13 做一次专项审计：特征对齐、折内缩放、阈值选择、在线更新的时间顺序逐项过一遍，结论写进 notebook。</td><td class="num">11/13 审计</td></tr>
+          <tr><td><strong>两人同时改 notebook</strong></td><td><span class="tag">中</span></td><td>开发期只改模块；notebook 由 B 在最后两天统一集成，A 只做审阅和局部修改。</td><td class="num">11/16 起</td></tr>
+          <tr><td><strong>Proposal 方法名不一致</strong></td><td><span class="tag">中</span></td><td>最终材料统一 DENFIS；重写口播稿；slides 第 1 页就明确“演化神经模糊系统”，不要出现 Fuzzy-LSTM 字样。</td><td class="num">11/17 彩排</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <p class="eyebrow">提交清单</p>
+      <h2>18 号中午前逐项打勾</h2>
+    </div>
+    <ul class="check">
+      <li><strong>可复现：</strong>新 kernel 从头到尾无报错，只读本地缓存数据，固定种子。</li>
+      <li><strong>可评分：</strong>九项 rubric 各有对应的 markdown 标题；首页写清姓名、学号、分工。</li>
+      <li><strong>代码可见：</strong>核心 DENFIS 实现内联在 notebook 里，不只藏在 .py 文件；关键行有注释。</li>
+      <li><strong>图表完整：</strong>每张图有标题、坐标轴与单位；表格小数位统一；参数设置写进 markdown。</li>
+      <li><strong>分析有观点：</strong>不只贴数字；写清参数如何影响结果、方法优缺点、与 SOTA 的差距。</li>
+      <li><strong>Slides：</strong>≤10 分钟，覆盖八项 rubric；若录音，检查音量、时长和口播稿中的方法名。</li>
+      <li><strong>提交：</strong>两人都在 NTULearn 提交；截止 11/18 23:59，目标 12:00 前完成。</li>
+      <li><strong>留档：</strong>本地保存 zip：notebook + slides + results + 数据缓存 + 环境说明。</li>
+      <li><strong>互评：</strong>11/23 收到材料，11/27 前由一人提交互评分数；不要拖到最后一天。</li>
+    </ul>
+  </section>
+
+  <footer>
+    <p>依据：任务要求 PDF（21 页，含评分表与示例代码说明）、Group 18 Proposal（2026-10-14）、当前环境检查。</p>
+    <p>生成日期 2026-11-08。时间表按 10 个自然日排，未假设整天空闲；如遇课程冲突，优先保 11/13 硬门槛。</p>
+  </footer>
+</div>
