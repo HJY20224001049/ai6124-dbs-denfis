@@ -250,10 +250,10 @@ def run_fold(
     if hasattr(final_model, "n_rules_"):
         metrics.update({
             "n_rules": int(final_model.n_rules_),
-            "rule_history": list(final_model.rule_history_),
-            "covariance_resets": int(final_model.resets_),
-            "cap_hits": int(final_model.cap_hits_),
-            "merges": int(final_model.merges_),
+            "rule_history": list(getattr(final_model, "rule_history_", [])),
+            "covariance_resets": int(getattr(final_model, "resets_", 0)),
+            "cap_hits": int(getattr(final_model, "cap_hits_", 0)),
+            "merges": int(getattr(final_model, "merges_", 0)),
         })
 
     pred_frame = pd.DataFrame(

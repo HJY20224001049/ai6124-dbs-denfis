@@ -252,8 +252,9 @@ def main() -> None:
         "",
         "- `mean_loss_diff` is mean squared error of A minus that of B; a positive "
         "value means A is worse.",
-        "- A significant positive DM statistic means the better model is genuinely "
-        "more accurate, not just luckier on these folds.",
+        "- A significant DM result is evidence of a mean loss difference under "
+        "the test assumptions. Comparisons are exploratory and not multiplicity-adjusted; "
+        "the reference baseline is selected by pooled RMSE.",
         "- The Sharpe interval resamples contiguous blocks of days, preserving some "
         "autocorrelation; an interval spanning zero means the trading result is not "
         "distinguishable from no edge.",
