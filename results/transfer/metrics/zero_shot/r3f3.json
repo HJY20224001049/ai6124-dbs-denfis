@@ -1,0 +1,204 @@
+{
+  "n": 252,
+  "rmse": 0.01207593579828577,
+  "mae": 0.007677579825902658,
+  "r2": 0.018683160940098587,
+  "ic": 0.18545685160771766,
+  "da": 0.47619047619047616,
+  "da5": 0.4831932773109244,
+  "sharpe": 1.2315336939944146,
+  "ann_ret": 0.14054460750627773,
+  "max_dd": 0.07296832266055024,
+  "turnover": 0.19444444444444445,
+  "exposure": 0.44047619047619047,
+  "cum_return": 0.14054460750627773,
+  "model": "denfis_transfer_zero_shot",
+  "fold_id": "r3f3",
+  "rep": 3,
+  "fold": 3,
+  "test_year": 2025,
+  "tau": 0.0,
+  "seed": 244,
+  "params": {
+    "dthr": 0.75,
+    "lam": 1.0
+  },
+  "validation_rmse": 0.0065665741191182625,
+  "search_results": [
+    {
+      "params": {
+        "dthr": 0.25,
+        "lam": 0.95
+      },
+      "val_rmse": 0.02041683010748598,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.25,
+        "lam": 0.98
+      },
+      "val_rmse": 0.010085822208768701,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.25,
+        "lam": 0.99
+      },
+      "val_rmse": 0.0074434948853925875,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.25,
+        "lam": 1.0
+      },
+      "val_rmse": 0.006875718134110426,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.5,
+        "lam": 0.95
+      },
+      "val_rmse": 0.015138955973800881,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.5,
+        "lam": 0.98
+      },
+      "val_rmse": 0.008028326938179524,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.5,
+        "lam": 0.99
+      },
+      "val_rmse": 0.006917241894922168,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.5,
+        "lam": 1.0
+      },
+      "val_rmse": 0.006639248043881726,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.75,
+        "lam": 0.95
+      },
+      "val_rmse": 0.013209865495842093,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.75,
+        "lam": 0.98
+      },
+      "val_rmse": 0.007967371858450699,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.75,
+        "lam": 0.99
+      },
+      "val_rmse": 0.006778783955008437,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.75,
+        "lam": 1.0
+      },
+      "val_rmse": 0.0065665741191182625,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 1.0,
+        "lam": 0.95
+      },
+      "val_rmse": 0.017851441066762938,
+      "n_rules": 87
+    },
+    {
+      "params": {
+        "dthr": 1.0,
+        "lam": 0.98
+      },
+      "val_rmse": 0.009030718879137376,
+      "n_rules": 87
+    },
+    {
+      "params": {
+        "dthr": 1.0,
+        "lam": 0.99
+      },
+      "val_rmse": 0.006746311700158838,
+      "n_rules": 87
+    },
+    {
+      "params": {
+        "dthr": 1.0,
+        "lam": 1.0
+      },
+      "val_rmse": 0.006574243471779761,
+      "n_rules": 87
+    },
+    {
+      "params": {
+        "dthr": 1.5,
+        "lam": 0.95
+      },
+      "val_rmse": 0.020459126070016233,
+      "n_rules": 21
+    },
+    {
+      "params": {
+        "dthr": 1.5,
+        "lam": 0.98
+      },
+      "val_rmse": 0.011764804553474137,
+      "n_rules": 21
+    },
+    {
+      "params": {
+        "dthr": 1.5,
+        "lam": 0.99
+      },
+      "val_rmse": 0.006728322492961276,
+      "n_rules": 21
+    },
+    {
+      "params": {
+        "dthr": 1.5,
+        "lam": 1.0
+      },
+      "val_rmse": 0.006572221563768475,
+      "n_rules": 21
+    }
+  ],
+  "elapsed_seconds": 36.39752999600023,
+  "n_rules": 200,
+  "rule_history": [
+    200
+  ],
+  "covariance_resets": 0,
+  "cap_hits": 46,
+  "merges": 0,
+  "protocol": "zero_shot",
+  "source_select_end": "2023-12-29 00:00:00",
+  "source_final_end": "2024-12-31 00:00:00",
+  "test_start": "2025-01-02 00:00:00",
+  "market_scaling": "separate training-only winsorisation/z-score",
+  "test_adaptation": false,
+  "selection_market": "STI"
+}

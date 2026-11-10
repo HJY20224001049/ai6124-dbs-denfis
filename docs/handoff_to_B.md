@@ -42,10 +42,10 @@
 ## 接入与验证
 
 ```bash
-python3.11 -m venv .venv
+uv venv --python 3.11 .venv
 source .venv/bin/activate
-pip install -r requirements.txt
-pip install -r requirements-deliverables.txt  # 仅 Notebook/slides 生成需要
+uv pip install -r requirements.txt
+uv pip install -r requirements-deliverables.txt  # 仅 Notebook/slides 生成需要
 python -m pytest -q
 python scripts/verify_method_artifacts.py
 python scripts/leakage_audit.py
@@ -79,3 +79,5 @@ GitHub 连接器虽能读取仓库，但创建 tree/ref 均返回 403 Resource n
 因此**尚未推送 GitHub**，不能假设远程 main 已包含本交付。
 权限恢复后执行 `git push -u origin feat/denfis-method-line`，再交叉审阅合并。
 离线交付包将另行提供，用于在有权限的机器上导入该分支。
+
+离线导入：在已有仓库中执行 `git fetch /path/to/denfis-method-line.bundle feat/denfis-method-line:feat/denfis-method-line`，再 checkout 该分支。ZIP 是完整已提交文件快照，不含虚拟环境。

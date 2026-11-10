@@ -1,21 +1,49 @@
 {
   "protocol_version": "1.1",
-  "config_hash": "4b029ac75813e21bee8c590c58a9ea9689baf52a4a0651d277d56f66b59a2f20",
-  "git_commit": "4d63394d807b7c643842fda5837b583db1fc581c",
-  "python": "Python 3.9.0",
+  "config_hash": "f84b8fbd182d8e0369e3ca21f3a98f7ba3f6d35eb48493e98456a701ce00b416",
+  "git_commit": "19e61397d614aed6054ee2eaf45d46b3cfacc442",
+  "python": "3.11.16 (main, Sep  1 2026, 14:18:37) [Clang 22.1.3 ]",
+  "executable": "/scratch-share/LINJ0121/ai6124-dbs-denfis/.venv/bin/python",
+  "source_sha256": {
+    "src/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "src/data.py": "ba09f721a8b70809002aa84e42c2171d92f6f2a8ea83c8a605a3f8492b70260f",
+    "src/evaluation/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "src/evaluation/backtest.py": "8d0c2fbbed470807e75a0ce6c92f96722e06c1d20e0538c12b1a559f3bbd3305",
+    "src/evaluation/cv.py": "54b3d165b34aaf753aae73d755f86f326a6b3932bb9ae94ca7df83a4c710faf0",
+    "src/evaluation/metrics.py": "e794d2eb859a96700f63432961d284e8237b3c0e07d13034ac92c7d3114b485c",
+    "src/evaluation/stats.py": "e7bad4cf4ff85d381f66872156e51872e76b5fb0a3d3fdf40cfb9096589df3b0",
+    "src/features.py": "f536e7610390af3940e3448ad7c490e0816787a8c6867e122a8ec447ff322790",
+    "src/models/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "src/models/base.py": "d32ca92faa2de5e479a35bac3a9c0e70280c2af31c2cff13c4593b4122781698",
+    "src/models/baselines.py": "45c587af002be3752f24b9d3f1008168483f25089bf10199878793a68311284e",
+    "src/models/denfis.py": "f95dcda62a0a885b06b8188b1c76665362f7074a60ee7cce7e704d167d4c6996",
+    "src/splits.py": "117458665f331607017ed968fb6f1eebcc0ff9c24f5ec48ec78ef290ee946793",
+    "src/transfer.py": "6786fa2e88fba9a03430b62743099dd9f0d7fb9c2c82b1ee309f799ca94c6d0e",
+    "scripts/analyze_denfis.py": "a800de15907fa177ab323f478f6bf483def4d86209c3f7c4951a70a486e958d4",
+    "scripts/build_method_deliverables.py": "bfa538583f4d6683fdf6304046833220e2e5de3df65e20578ea7ff5150a163bd",
+    "scripts/check_pipeline.py": "63eefd4bc74d52603f50471754233463fd1b56ebf5107cc136ea9ba7fa4c8173",
+    "scripts/eda.py": "7667249cf823484db67bc2f1d615c3a96ce2d0541fd6b4f7ddc7f294ed54f694",
+    "scripts/leakage_audit.py": "a04a2506e600dff654f2a4a97d2b4d1f65ae41f7c34e36a73431a66f672fc068",
+    "scripts/make_results_table.py": "7a65a4bb4b49ba3b8a7b472608639cbdbb4a3db5770bb50c3ebe503c24b6c83d",
+    "scripts/plot_results.py": "46951c6d7b4260ea9f103c48da7272a3e395bfd787cd6a1eb3d03874614ed979",
+    "scripts/run_baseline.py": "3aef4a2082285e144f76cfe8f08178733522c4db8e17bffb7d73398564264b3d",
+    "scripts/run_transfer.py": "b29cc007b6854b561925fad34a9eefaebc9c59a27777c7add61d62dbc8c92271",
+    "scripts/statistical_tests.py": "d803e534a14f269c42c7925c9032549e30fef0e48939f2b27d9f3782e1031a0a",
+    "scripts/verify_method_artifacts.py": "5f7e451ab718f30aeee77533e2685bf5aca2c01be12781a7f0189104cf612189"
+  },
   "packages": {
     "numpy": "1.24.4",
     "pandas": "2.3.3",
     "scikit-learn": "1.6.1",
-    "xgboost": "2.1.4",
-    "torch": "2.8.0",
+    "xgboost": "not installed",
+    "torch": "not installed",
     "matplotlib": "3.9.4",
     "scipy": "1.13.1",
-    "yfinance": "0.2.55"
+    "yfinance": "not installed"
   },
   "data_sha256": {
-    "D05_SI.csv": "d73207ac25cfdd99e87e68411087c7b2c0b8ece236fe0f8474c3d6e292cdc3b9",
-    "STI.csv": "19e0c8dd0245ea00d3c65d89f3bc19c8e87d8becaba0168b376a95a4c8cc6723"
+    "D05_SI.csv": "14cdfaf922b431c1f6313fe550cf612bae0c389628cf4ab6b760a7cb0a5ffb5c",
+    "STI.csv": "e32dce41fbf98057b6dd467a5c686e9744fd06412b05e0531e7319abd0ff32bd"
   },
-  "generated_at": "2026-11-08T06:45:36.924145+00:00"
+  "generated_at": "2026-11-10T07:48:27.348661+00:00"
 }

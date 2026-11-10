@@ -19,6 +19,7 @@ from src.splits import make_folds_from_frame
 from src.transfer import load_transfer_frames
 from src.evaluation.backtest import run_backtest
 from src.evaluation.metrics import compute_metrics
+from src.evaluation.cv import write_manifest
 
 
 def check_predictions(path, metrics, frame, fold):
@@ -96,6 +97,13 @@ def main():
               'checks':'date/target alignment; finite values; RMSE; signal threshold; cost ledger; rule cap; selection records; source cutoffs; online history',
               'status':'PASS'}
     (ROOT/'docs/method_acceptance.json').write_text(json.dumps(report,indent=2)+'\n')
+    manifest = write_manifest()
+    manifest['run_type'] = 'selected-model replay and artifact acceptance, not a repeated grid search'
+    manifest['acceptance'] = report
+    manifest['baseline_provenance'] = 'docs/baseline_manifest.json'
+    directory = ROOT/'results/manifests'
+    directory.mkdir(exist_ok=True)
+    (directory/'method_acceptance.json').write_text(json.dumps(manifest,indent=2)+'\n')
     print(json.dumps(report,indent=2))
 
 

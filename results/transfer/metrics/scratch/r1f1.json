@@ -1,0 +1,203 @@
+{
+  "n": 250,
+  "rmse": 0.010644005816304074,
+  "mae": 0.008031627132672714,
+  "r2": -0.03511442061877856,
+  "ic": 0.03756184004938635,
+  "da": 0.504,
+  "da5": 0.5232067510548524,
+  "sharpe": 1.6394649722903885,
+  "ann_ret": 0.19566183091783684,
+  "max_dd": 0.04999305232435281,
+  "turnover": 0.264,
+  "exposure": 0.416,
+  "cum_return": 0.19396728199147972,
+  "model": "denfis_transfer_scratch",
+  "fold_id": "r1f1",
+  "rep": 1,
+  "fold": 1,
+  "test_year": 2017,
+  "tau": 0.0,
+  "seed": 42,
+  "params": {
+    "dthr": 1.5,
+    "lam": 1.0
+  },
+  "validation_rmse": 0.012122349457581102,
+  "search_results": [
+    {
+      "params": {
+        "dthr": 0.25,
+        "lam": 0.95
+      },
+      "val_rmse": 0.01642639299940738,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.25,
+        "lam": 0.98
+      },
+      "val_rmse": 0.013877917225064146,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.25,
+        "lam": 0.99
+      },
+      "val_rmse": 0.013405427388484763,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.25,
+        "lam": 1.0
+      },
+      "val_rmse": 0.013645587355791019,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.5,
+        "lam": 0.95
+      },
+      "val_rmse": 0.02138462354310096,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.5,
+        "lam": 0.98
+      },
+      "val_rmse": 0.014936701927012866,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.5,
+        "lam": 0.99
+      },
+      "val_rmse": 0.013561665627927518,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.5,
+        "lam": 1.0
+      },
+      "val_rmse": 0.012469913380086512,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.75,
+        "lam": 0.95
+      },
+      "val_rmse": 0.01850272913501706,
+      "n_rules": 129
+    },
+    {
+      "params": {
+        "dthr": 0.75,
+        "lam": 0.98
+      },
+      "val_rmse": 0.014137700632474708,
+      "n_rules": 129
+    },
+    {
+      "params": {
+        "dthr": 0.75,
+        "lam": 0.99
+      },
+      "val_rmse": 0.01324933407949734,
+      "n_rules": 129
+    },
+    {
+      "params": {
+        "dthr": 0.75,
+        "lam": 1.0
+      },
+      "val_rmse": 0.012445776575373324,
+      "n_rules": 129
+    },
+    {
+      "params": {
+        "dthr": 1.0,
+        "lam": 0.95
+      },
+      "val_rmse": 0.01605558657549976,
+      "n_rules": 52
+    },
+    {
+      "params": {
+        "dthr": 1.0,
+        "lam": 0.98
+      },
+      "val_rmse": 0.013352028681216366,
+      "n_rules": 52
+    },
+    {
+      "params": {
+        "dthr": 1.0,
+        "lam": 0.99
+      },
+      "val_rmse": 0.01284506846561061,
+      "n_rules": 52
+    },
+    {
+      "params": {
+        "dthr": 1.0,
+        "lam": 1.0
+      },
+      "val_rmse": 0.012247397203591725,
+      "n_rules": 52
+    },
+    {
+      "params": {
+        "dthr": 1.5,
+        "lam": 0.95
+      },
+      "val_rmse": 0.014436650796997345,
+      "n_rules": 12
+    },
+    {
+      "params": {
+        "dthr": 1.5,
+        "lam": 0.98
+      },
+      "val_rmse": 0.012804894164014261,
+      "n_rules": 12
+    },
+    {
+      "params": {
+        "dthr": 1.5,
+        "lam": 0.99
+      },
+      "val_rmse": 0.012485972413257943,
+      "n_rules": 12
+    },
+    {
+      "params": {
+        "dthr": 1.5,
+        "lam": 1.0
+      },
+      "val_rmse": 0.012122349457581102,
+      "n_rules": 12
+    }
+  ],
+  "elapsed_seconds": 13.746507828007452,
+  "n_rules": 11,
+  "rule_history": [
+    11
+  ],
+  "covariance_resets": 0,
+  "cap_hits": 0,
+  "merges": 0,
+  "protocol": "scratch",
+  "source_select_end": "2015-12-31 00:00:00",
+  "source_final_end": "2016-12-30 00:00:00",
+  "test_start": "2017-01-03 00:00:00",
+  "market_scaling": "separate training-only winsorisation/z-score",
+  "test_adaptation": false
+}

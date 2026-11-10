@@ -16,9 +16,9 @@
 所有命令均在仓库根目录执行；项目没有单独的构建步骤。
 
 ```bash
-python3.11 -m venv .venv
+uv venv --python 3.11 .venv
 source .venv/bin/activate
-python -m pip install -r requirements.txt
+uv pip install -r requirements.txt
 python -m src.data                           # 下载并缓存行情
 python scripts/check_pipeline.py             # 检查特征和数据折，生成汇总
 python -m pytest -q                          # 运行测试

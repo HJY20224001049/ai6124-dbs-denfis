@@ -1,0 +1,203 @@
+{
+  "n": 253,
+  "rmse": 0.011264952300887388,
+  "mae": 0.008122431848680478,
+  "r2": -0.03533632851977786,
+  "ic": -0.11739426840774023,
+  "da": 0.4505928853754941,
+  "da5": 0.45416666666666666,
+  "sharpe": -0.8560206647057702,
+  "ann_ret": -0.06990141654154025,
+  "max_dd": 0.11684693669061842,
+  "turnover": 0.09486166007905138,
+  "exposure": 0.05928853754940711,
+  "cum_return": -0.07016883566946008,
+  "model": "denfis_transfer_scratch",
+  "fold_id": "r2f2",
+  "rep": 2,
+  "fold": 2,
+  "test_year": 2021,
+  "tau": 0.002,
+  "seed": 143,
+  "params": {
+    "dthr": 1.5,
+    "lam": 1.0
+  },
+  "validation_rmse": 0.018179729861796372,
+  "search_results": [
+    {
+      "params": {
+        "dthr": 0.25,
+        "lam": 0.95
+      },
+      "val_rmse": 0.039097587916106825,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.25,
+        "lam": 0.98
+      },
+      "val_rmse": 0.022872836361414097,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.25,
+        "lam": 0.99
+      },
+      "val_rmse": 0.021208209324234648,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.25,
+        "lam": 1.0
+      },
+      "val_rmse": 0.01982312372417274,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.5,
+        "lam": 0.95
+      },
+      "val_rmse": 0.0383874509499247,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.5,
+        "lam": 0.98
+      },
+      "val_rmse": 0.021881680978614586,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.5,
+        "lam": 0.99
+      },
+      "val_rmse": 0.02057466142284123,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.5,
+        "lam": 1.0
+      },
+      "val_rmse": 0.019303791823337697,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.75,
+        "lam": 0.95
+      },
+      "val_rmse": 0.041327222278546016,
+      "n_rules": 178
+    },
+    {
+      "params": {
+        "dthr": 0.75,
+        "lam": 0.98
+      },
+      "val_rmse": 0.019853514265980733,
+      "n_rules": 178
+    },
+    {
+      "params": {
+        "dthr": 0.75,
+        "lam": 0.99
+      },
+      "val_rmse": 0.019520218301309684,
+      "n_rules": 178
+    },
+    {
+      "params": {
+        "dthr": 0.75,
+        "lam": 1.0
+      },
+      "val_rmse": 0.018416280286328062,
+      "n_rules": 178
+    },
+    {
+      "params": {
+        "dthr": 1.0,
+        "lam": 0.95
+      },
+      "val_rmse": 0.038832419876356085,
+      "n_rules": 66
+    },
+    {
+      "params": {
+        "dthr": 1.0,
+        "lam": 0.98
+      },
+      "val_rmse": 0.01990671135711184,
+      "n_rules": 66
+    },
+    {
+      "params": {
+        "dthr": 1.0,
+        "lam": 0.99
+      },
+      "val_rmse": 0.019270867949620588,
+      "n_rules": 66
+    },
+    {
+      "params": {
+        "dthr": 1.0,
+        "lam": 1.0
+      },
+      "val_rmse": 0.01820520795764979,
+      "n_rules": 66
+    },
+    {
+      "params": {
+        "dthr": 1.5,
+        "lam": 0.95
+      },
+      "val_rmse": 0.03871013789251053,
+      "n_rules": 13
+    },
+    {
+      "params": {
+        "dthr": 1.5,
+        "lam": 0.98
+      },
+      "val_rmse": 0.020167547818374227,
+      "n_rules": 13
+    },
+    {
+      "params": {
+        "dthr": 1.5,
+        "lam": 0.99
+      },
+      "val_rmse": 0.01937887053190474,
+      "n_rules": 13
+    },
+    {
+      "params": {
+        "dthr": 1.5,
+        "lam": 1.0
+      },
+      "val_rmse": 0.018179729861796372,
+      "n_rules": 13
+    }
+  ],
+  "elapsed_seconds": 26.299887540051714,
+  "n_rules": 19,
+  "rule_history": [
+    19
+  ],
+  "covariance_resets": 0,
+  "cap_hits": 0,
+  "merges": 0,
+  "protocol": "scratch",
+  "source_select_end": "2019-12-31 00:00:00",
+  "source_final_end": "2020-12-31 00:00:00",
+  "test_start": "2021-01-04 00:00:00",
+  "market_scaling": "separate training-only winsorisation/z-score",
+  "test_adaptation": false
+}

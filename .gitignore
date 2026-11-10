@@ -24,3 +24,6 @@ Thumbs.db
 
 # Temporary
 _tmp_pages/
+
+# Generated offline handoff archives
+delivery/

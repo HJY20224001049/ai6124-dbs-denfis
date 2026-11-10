@@ -1,0 +1,45 @@
+{
+  "n": 250,
+  "rmse": 0.010544148871848149,
+  "mae": 0.0078964734096419,
+  "r2": -0.01578363251234327,
+  "ic": -0.0719750489901206,
+  "da": 0.524,
+  "da5": 0.5316455696202531,
+  "sharpe": 2.432419671007648,
+  "ann_ret": 0.48008997180546187,
+  "max_dd": 0.08421204709832907,
+  "turnover": 0.004,
+  "exposure": 1.0,
+  "cum_return": 0.47549119820716546,
+  "model": "no_rls",
+  "fold_id": "r1f1",
+  "rep": 1,
+  "fold": 1,
+  "test_year": 2017,
+  "tau": 0.0,
+  "seed": 42,
+  "params": {
+    "dthr": 1.5,
+    "lam": 1.0
+  },
+  "validation_rmse": 0.011991222649780931,
+  "search_results": [
+    {
+      "params": {
+        "dthr": 1.5,
+        "lam": 1.0
+      },
+      "val_rmse": 0.011991222649780931,
+      "n_rules": 12
+    }
+  ],
+  "elapsed_seconds": 0.3280586199834943,
+  "n_rules": 11,
+  "rule_history": [
+    11
+  ],
+  "covariance_resets": 0,
+  "cap_hits": 0,
+  "merges": 0
+}

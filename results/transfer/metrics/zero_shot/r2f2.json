@@ -1,0 +1,204 @@
+{
+  "n": 253,
+  "rmse": 0.011197671943203664,
+  "mae": 0.008049851229239322,
+  "r2": -0.02300608872465193,
+  "ic": -0.05910952863479396,
+  "da": 0.43873517786561267,
+  "da5": 0.45,
+  "sharpe": -0.12884497738913514,
+  "ann_ret": -0.02149072032662669,
+  "max_dd": 0.13428981575807114,
+  "turnover": 0.3201581027667984,
+  "exposure": 0.43873517786561267,
+  "cum_return": -0.021575074319593712,
+  "model": "denfis_transfer_zero_shot",
+  "fold_id": "r2f2",
+  "rep": 2,
+  "fold": 2,
+  "test_year": 2021,
+  "tau": 0.0,
+  "seed": 143,
+  "params": {
+    "dthr": 1.5,
+    "lam": 1.0
+  },
+  "validation_rmse": 0.015127040719195274,
+  "search_results": [
+    {
+      "params": {
+        "dthr": 0.25,
+        "lam": 0.95
+      },
+      "val_rmse": 0.03212371675178798,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.25,
+        "lam": 0.98
+      },
+      "val_rmse": 0.027362669200398294,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.25,
+        "lam": 0.99
+      },
+      "val_rmse": 0.022228537744078593,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.25,
+        "lam": 1.0
+      },
+      "val_rmse": 0.017144619290355722,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.5,
+        "lam": 0.95
+      },
+      "val_rmse": 0.03457432775863522,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.5,
+        "lam": 0.98
+      },
+      "val_rmse": 0.016554835041232358,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.5,
+        "lam": 0.99
+      },
+      "val_rmse": 0.016624528097884454,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.5,
+        "lam": 1.0
+      },
+      "val_rmse": 0.0155431098802403,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.75,
+        "lam": 0.95
+      },
+      "val_rmse": 0.03508519057538456,
+      "n_rules": 169
+    },
+    {
+      "params": {
+        "dthr": 0.75,
+        "lam": 0.98
+      },
+      "val_rmse": 0.015824418692368163,
+      "n_rules": 169
+    },
+    {
+      "params": {
+        "dthr": 0.75,
+        "lam": 0.99
+      },
+      "val_rmse": 0.015721154895328857,
+      "n_rules": 169
+    },
+    {
+      "params": {
+        "dthr": 0.75,
+        "lam": 1.0
+      },
+      "val_rmse": 0.015312955264706319,
+      "n_rules": 169
+    },
+    {
+      "params": {
+        "dthr": 1.0,
+        "lam": 0.95
+      },
+      "val_rmse": 0.036585390088002906,
+      "n_rules": 65
+    },
+    {
+      "params": {
+        "dthr": 1.0,
+        "lam": 0.98
+      },
+      "val_rmse": 0.015444320630747355,
+      "n_rules": 65
+    },
+    {
+      "params": {
+        "dthr": 1.0,
+        "lam": 0.99
+      },
+      "val_rmse": 0.015316120464355076,
+      "n_rules": 65
+    },
+    {
+      "params": {
+        "dthr": 1.0,
+        "lam": 1.0
+      },
+      "val_rmse": 0.015167735968752876,
+      "n_rules": 65
+    },
+    {
+      "params": {
+        "dthr": 1.5,
+        "lam": 0.95
+      },
+      "val_rmse": 0.0384345930644015,
+      "n_rules": 13
+    },
+    {
+      "params": {
+        "dthr": 1.5,
+        "lam": 0.98
+      },
+      "val_rmse": 0.015324390495001896,
+      "n_rules": 13
+    },
+    {
+      "params": {
+        "dthr": 1.5,
+        "lam": 0.99
+      },
+      "val_rmse": 0.015165495855804137,
+      "n_rules": 13
+    },
+    {
+      "params": {
+        "dthr": 1.5,
+        "lam": 1.0
+      },
+      "val_rmse": 0.015127040719195274,
+      "n_rules": 13
+    }
+  ],
+  "elapsed_seconds": 23.369709116057493,
+  "n_rules": 22,
+  "rule_history": [
+    22
+  ],
+  "covariance_resets": 0,
+  "cap_hits": 0,
+  "merges": 0,
+  "protocol": "zero_shot",
+  "source_select_end": "2019-12-31 00:00:00",
+  "source_final_end": "2020-12-31 00:00:00",
+  "test_start": "2021-01-04 00:00:00",
+  "market_scaling": "separate training-only winsorisation/z-score",
+  "test_adaptation": false,
+  "selection_market": "STI"
+}

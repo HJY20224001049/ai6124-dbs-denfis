@@ -6,6 +6,8 @@ Pooled out-of-sample results, 2017–2025 (nine walk-forward folds; the 2026 hol
 
 | model | n | rmse | mae | r2 | ic | da | sharpe | sharpe_95ci |
 |---|---|---|---|---|---|---|---|---|
+| denfis_frozen | 2258 | 0.0121 | 0.0086 | -0.0194 | 0.0357 | 0.5009 | 0.6541 | [-0.041, 1.309] |
+| denfis_online | 2258 | 0.0122 | 0.0086 | -0.0397 | 0.0012 | 0.5018 | 0.2595 | [-0.413, 0.889] |
 | lstm | 2258 | 0.0120 | 0.0085 | -0.0156 | 0.0061 | 0.4845 | 0.4066 | [-0.285, 1.114] |
 | xgboost | 2258 | 0.0120 | 0.0085 | -0.0098 | -0.0094 | 0.5084 | 0.2376 | [-0.474, 0.941] |
 
@@ -17,12 +19,12 @@ Positive DM statistic = model A has the larger squared errors (worse forecast). 
 
 | model_a | model_b | mean_loss_diff | dm_stat | p_value | lag | n | outcome |
 |---|---|---|---|---|---|---|---|
-| xgboost | lstm | -8.25e-07 | -0.7470 | 0.4551 | 7 | 2258 | not significant |
+| denfis_frozen | xgboost | +1.37e-06 | 1.2306 | 0.2185 | 7 | 2258 | not significant |
+| denfis_online | xgboost | +4.27e-06 | 1.5092 | 0.1312 | 7 | 2258 | not significant |
+| denfis_online | denfis_frozen | +2.90e-06 | 1.0932 | 0.2743 | 7 | 2258 | not significant |
 
 ## Reading the table
 
 - `mean_loss_diff` is mean squared error of A minus that of B; a positive value means A is worse.
-- A significant positive DM statistic means the better model is genuinely more accurate, not just luckier on these folds.
+- A significant DM result is evidence of a mean loss difference under the test assumptions. Comparisons are exploratory and not multiplicity-adjusted; the reference baseline is selected by pooled RMSE.
 - The Sharpe interval resamples contiguous blocks of days, preserving some autocorrelation; an interval spanning zero means the trading result is not distinguishable from no edge.
-
-> **Placeholder:** DENFIS predictions are not on disk yet, so the DM row compares the two best baselines. Re-run this script after the DENFIS folds land; the pair selection will switch automatically to DENFIS vs the best baseline.

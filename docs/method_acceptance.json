@@ -1,0 +1,11 @@
+{
+  "prediction_files": 35,
+  "prediction_rows_checked": 8793,
+  "regular_folds_per_main_model": 9,
+  "transfer_protocols": 3,
+  "transfer_folds_per_protocol": 3,
+  "denfis_holdout_run": false,
+  "selected_model_replays": 18,
+  "checks": "date/target alignment; finite values; RMSE; signal threshold; cost ledger; rule cap; selection records; source cutoffs; online history",
+  "status": "PASS"
+}

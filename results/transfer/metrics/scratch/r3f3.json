@@ -1,0 +1,203 @@
+{
+  "n": 252,
+  "rmse": 0.012025054918446626,
+  "mae": 0.007657709208574792,
+  "r2": 0.026935121971408016,
+  "ic": 0.17488532830967585,
+  "da": 0.5357142857142857,
+  "da5": 0.5294117647058824,
+  "sharpe": 1.2484485886845123,
+  "ann_ret": 0.14917109495837022,
+  "max_dd": 0.10349620318677143,
+  "turnover": 0.27380952380952384,
+  "exposure": 0.46825396825396826,
+  "cum_return": 0.14917109495837022,
+  "model": "denfis_transfer_scratch",
+  "fold_id": "r3f3",
+  "rep": 3,
+  "fold": 3,
+  "test_year": 2025,
+  "tau": 0.0005,
+  "seed": 244,
+  "params": {
+    "dthr": 0.75,
+    "lam": 1.0
+  },
+  "validation_rmse": 0.010676636261469684,
+  "search_results": [
+    {
+      "params": {
+        "dthr": 0.25,
+        "lam": 0.95
+      },
+      "val_rmse": 0.021893705907619188,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.25,
+        "lam": 0.98
+      },
+      "val_rmse": 0.013286358060398192,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.25,
+        "lam": 0.99
+      },
+      "val_rmse": 0.012120204382092924,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.25,
+        "lam": 1.0
+      },
+      "val_rmse": 0.010683396779572819,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.5,
+        "lam": 0.95
+      },
+      "val_rmse": 0.03258184651531794,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.5,
+        "lam": 0.98
+      },
+      "val_rmse": 0.019803191986571697,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.5,
+        "lam": 0.99
+      },
+      "val_rmse": 0.01169308162253478,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.5,
+        "lam": 1.0
+      },
+      "val_rmse": 0.01073081916070485,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.75,
+        "lam": 0.95
+      },
+      "val_rmse": 0.036804660685334306,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.75,
+        "lam": 0.98
+      },
+      "val_rmse": 0.027002246084128233,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.75,
+        "lam": 0.99
+      },
+      "val_rmse": 0.01161209452590418,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 0.75,
+        "lam": 1.0
+      },
+      "val_rmse": 0.010676636261469684,
+      "n_rules": 200
+    },
+    {
+      "params": {
+        "dthr": 1.0,
+        "lam": 0.95
+      },
+      "val_rmse": 0.03745012551320111,
+      "n_rules": 90
+    },
+    {
+      "params": {
+        "dthr": 1.0,
+        "lam": 0.98
+      },
+      "val_rmse": 0.029402316597862202,
+      "n_rules": 90
+    },
+    {
+      "params": {
+        "dthr": 1.0,
+        "lam": 0.99
+      },
+      "val_rmse": 0.011620191862017229,
+      "n_rules": 90
+    },
+    {
+      "params": {
+        "dthr": 1.0,
+        "lam": 1.0
+      },
+      "val_rmse": 0.010698867135220119,
+      "n_rules": 90
+    },
+    {
+      "params": {
+        "dthr": 1.5,
+        "lam": 0.95
+      },
+      "val_rmse": 0.037702310380095694,
+      "n_rules": 22
+    },
+    {
+      "params": {
+        "dthr": 1.5,
+        "lam": 0.98
+      },
+      "val_rmse": 0.03095950270001232,
+      "n_rules": 22
+    },
+    {
+      "params": {
+        "dthr": 1.5,
+        "lam": 0.99
+      },
+      "val_rmse": 0.011534376733549574,
+      "n_rules": 22
+    },
+    {
+      "params": {
+        "dthr": 1.5,
+        "lam": 1.0
+      },
+      "val_rmse": 0.01071092051791684,
+      "n_rules": 22
+    }
+  ],
+  "elapsed_seconds": 40.426605811924674,
+  "n_rules": 200,
+  "rule_history": [
+    200
+  ],
+  "covariance_resets": 0,
+  "cap_hits": 62,
+  "merges": 0,
+  "protocol": "scratch",
+  "source_select_end": "2023-12-29 00:00:00",
+  "source_final_end": "2024-12-31 00:00:00",
+  "test_start": "2025-01-02 00:00:00",
+  "market_scaling": "separate training-only winsorisation/z-score",
+  "test_adaptation": false
+}

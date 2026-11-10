@@ -1,6 +1,6 @@
 # Leakage audit
 
-Checks: 97; failures: 0
+Checks: 133; failures: 0
 
 | Check | Result | Detail |
 |---|---|---|
@@ -60,6 +60,42 @@ Checks: 97; failures: 0
 | holdout: no train/test index overlap | PASS |  |
 | features before 2020-01-02 unchanged when future prices double | PASS | 2444 rows compared |
 | scaler parameters unchanged when validation/test features are perturbed | PASS | fold r1f1 |
+| denfis_frozen/r1f1: dates and y align | PASS | 250 rows |
+| denfis_frozen/r1f1: finite predictions | PASS |  |
+| denfis_frozen/r1f2: dates and y align | PASS | 251 rows |
+| denfis_frozen/r1f2: finite predictions | PASS |  |
+| denfis_frozen/r1f3: dates and y align | PASS | 250 rows |
+| denfis_frozen/r1f3: finite predictions | PASS |  |
+| denfis_frozen/r2f1: dates and y align | PASS | 251 rows |
+| denfis_frozen/r2f1: finite predictions | PASS |  |
+| denfis_frozen/r2f2: dates and y align | PASS | 253 rows |
+| denfis_frozen/r2f2: finite predictions | PASS |  |
+| denfis_frozen/r2f3: dates and y align | PASS | 250 rows |
+| denfis_frozen/r2f3: finite predictions | PASS |  |
+| denfis_frozen/r3f1: dates and y align | PASS | 249 rows |
+| denfis_frozen/r3f1: finite predictions | PASS |  |
+| denfis_frozen/r3f2: dates and y align | PASS | 252 rows |
+| denfis_frozen/r3f2: finite predictions | PASS |  |
+| denfis_frozen/r3f3: dates and y align | PASS | 252 rows |
+| denfis_frozen/r3f3: finite predictions | PASS |  |
+| denfis_online/r1f1: dates and y align | PASS | 250 rows |
+| denfis_online/r1f1: finite predictions | PASS |  |
+| denfis_online/r1f2: dates and y align | PASS | 251 rows |
+| denfis_online/r1f2: finite predictions | PASS |  |
+| denfis_online/r1f3: dates and y align | PASS | 250 rows |
+| denfis_online/r1f3: finite predictions | PASS |  |
+| denfis_online/r2f1: dates and y align | PASS | 251 rows |
+| denfis_online/r2f1: finite predictions | PASS |  |
+| denfis_online/r2f2: dates and y align | PASS | 253 rows |
+| denfis_online/r2f2: finite predictions | PASS |  |
+| denfis_online/r2f3: dates and y align | PASS | 250 rows |
+| denfis_online/r2f3: finite predictions | PASS |  |
+| denfis_online/r3f1: dates and y align | PASS | 249 rows |
+| denfis_online/r3f1: finite predictions | PASS |  |
+| denfis_online/r3f2: dates and y align | PASS | 252 rows |
+| denfis_online/r3f2: finite predictions | PASS |  |
+| denfis_online/r3f3: dates and y align | PASS | 252 rows |
+| denfis_online/r3f3: finite predictions | PASS |  |
 | lstm/holdout: dates and y align | PASS | 209 rows |
 | lstm/holdout: finite predictions | PASS |  |
 | lstm/r1f1: dates and y align | PASS | 250 rows |
@@ -100,4 +136,4 @@ Checks: 97; failures: 0
 | xgboost/r3f2: finite predictions | PASS |  |
 | xgboost/r3f3: dates and y align | PASS | 252 rows |
 | xgboost/r3f3: finite predictions | PASS |  |
-| at least one prediction file audited | PASS | 20 files |
+| at least one prediction file audited | PASS | 38 files |
