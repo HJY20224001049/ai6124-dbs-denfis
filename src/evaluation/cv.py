@@ -303,8 +303,14 @@ def run_model_on_folds(
 ) -> pd.DataFrame:
     """Run a model over selected folds and refresh summary + manifest."""
     selected = [
-        fold for fold in folds if fold_ids is None or fold.fold_id in set(fold_ids)
+        fold for fold in folds
+        if (fold.fold_id != "holdout" if fold_ids is None
+            else fold.fold_id in set(fold_ids))
     ]
+    if fold_ids is not None:
+        unknown = set(fold_ids) - {fold.fold_id for fold in folds}
+        if unknown:
+            raise ValueError(f"unknown fold ids: {sorted(unknown)}")
     rows = []
     for fold in selected:
         seed = HOLDOUT_SEED if fold.fold_id == "holdout" else fold_seed(fold.rep, fold.fold)

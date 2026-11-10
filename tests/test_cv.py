@@ -113,3 +113,58 @@ def test_run_fold_sequence_contract():
     assert metrics["model"] == "dummy_seq"
     assert metrics["fold_id"] == "r1f1"
     assert pred.notna().all().all()
+
+
+def test_all_folds_excludes_holdout_and_rejects_unknown(monkeypatch):
+    import pytest
+    from src.evaluation import cv
+
+    frame = _frame()
+    folds = make_folds_from_frame(frame)
+    seen = []
+
+    def run(model_name, factory, fold, *args, **kwargs):
+        seen.append(fold.fold_id)
+        return pd.DataFrame(), {"rmse": 0., "da": 0., "sharpe": 0., "tau": 0.}
+
+    monkeypatch.setattr(cv, "run_fold", run)
+    monkeypatch.setattr(cv, "save_fold_result", lambda *args: None)
+    monkeypatch.setattr(cv, "build_summary", lambda: pd.DataFrame())
+    monkeypatch.setattr(cv, "write_manifest", lambda: None)
+    cv.run_model_on_folds("dummy", None, folds, frame, [{}])
+    assert len(seen) == 9 and "holdout" not in seen
+    seen.clear()
+    cv.run_model_on_folds("dummy", None, folds, frame, [{}], fold_ids=["holdout"])
+    assert seen == ["holdout"]
+    with pytest.raises(ValueError, match="unknown fold"):
+        cv.run_model_on_folds("dummy", None, folds, frame, [{}], fold_ids=["typo"])
+
+
+def test_online_runner_predicts_before_realised_label_update():
+    frame = _frame()
+    fold = get_fold(make_folds_from_frame(frame), "r1f1")
+    created = []
+
+    class RecordingModel(DummyModel):
+        def __init__(self):
+            super().__init__()
+            self.events = []
+
+        def predict(self, X):
+            self.events.append(("predict", len(X)))
+            return super().predict(X)
+
+        def partial_fit(self, x, y):
+            self.events.append(("update", float(y)))
+
+    def factory(params, seed):
+        model = RecordingModel()
+        created.append(model)
+        return model
+
+    run_fold("online_dummy", factory, fold, frame, [{}], seed=42, online=True)
+    events = created[-1].events
+    assert len(events) == 2 * len(fold.test_idx)
+    for i, target in enumerate(frame.iloc[fold.test_idx][TARGET_COL]):
+        assert events[2*i] == ("predict", 1)
+        assert events[2*i+1] == ("update", float(target))
