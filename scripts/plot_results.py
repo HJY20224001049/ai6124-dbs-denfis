@@ -54,7 +54,7 @@ def _regular_predictions(model: str) -> pd.DataFrame:
     return pd.concat(frames, ignore_index=True).sort_values("date").reset_index(drop=True)
 
 
-def plot_equity(models: list[str]) -> Path:
+def plot_equity(models: list[str], suffix: str = "baseline", online: bool = False) -> Path:
     fig, ax = plt.subplots(figsize=(8.5, 4.2))
     bench = None
     for model in models:
@@ -67,18 +67,18 @@ def plot_equity(models: list[str]) -> Path:
         if bench is None:
             bench = (1.0 + preds["bench_ret"]).cumprod()
             ax.plot(dates, bench, label="buy & hold", color="#16211E", linewidth=0.9, linestyle="--")
-    ax.set_title("Out-of-sample equity, 2017–2025 (10 bp one-way cost)")
+    ax.set_title(("Online extension: predict then update" if online else "Frozen comparison, 2017–2025") + " (10 bp one-way cost)")
     ax.set_ylabel("Growth of 1 SGD")
     ax.set_xlabel("Date")
     ax.legend(frameon=False, ncol=2)
-    path = FIGURES_DIR / "baseline_equity.png"
+    path = FIGURES_DIR / f"{suffix}_equity.png"
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
     return path
 
 
-def plot_directional_accuracy(models: list[str]) -> Path:
+def plot_directional_accuracy(models: list[str], suffix: str = "baseline") -> Path:
     folds = [f"r{rep}f{fold}" for rep in (1, 2, 3) for fold in (1, 2, 3)]
     values = {}
     for model in models:
@@ -106,11 +106,11 @@ def plot_directional_accuracy(models: list[str]) -> Path:
     ax.axhline(0.5, color="#16211E", linewidth=0.8, linestyle=":")
     ax.set_xticks(x)
     ax.set_xticklabels(folds)
-    ax.set_ylim(0.4, 0.62)
+    ax.set_ylim(0.0, 1.0)
     ax.set_ylabel("Directional accuracy")
     ax.set_title("Directional accuracy by test fold")
     ax.legend(frameon=False, ncol=2)
-    path = FIGURES_DIR / "baseline_da.png"
+    path = FIGURES_DIR / f"{suffix}_da.png"
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
@@ -122,8 +122,13 @@ def main() -> None:
     if not models:
         raise SystemExit("No predictions found in results/preds")
     print("models:", ", ".join(models))
-    print(plot_equity(models))
-    print(plot_directional_accuracy(models))
+    main_models = [m for m in models if m in ("denfis_frozen", "xgboost", "lstm")]
+    print(plot_equity(main_models))
+    print(plot_directional_accuracy(main_models))
+    if "denfis_online" in models:
+        variants = [m for m in ("denfis_frozen", "denfis_online") if m in models]
+        print(plot_equity(variants, "denfis_online", online=True))
+        print(plot_directional_accuracy(variants, "denfis_online"))
 
 
 if __name__ == "__main__":

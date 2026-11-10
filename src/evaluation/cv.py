@@ -334,7 +334,14 @@ def run_model_on_folds(
         )
 
     summary = build_summary()
-    write_manifest()
+    manifest = write_manifest()
+    if isinstance(manifest, dict):
+        manifest = {**manifest, "model": model_name,
+                    "folds": [fold.fold_id for fold in selected]}
+        directory = RESULTS_DIR / "manifests"
+        directory.mkdir(parents=True, exist_ok=True)
+        (directory / f"{model_name}.json").write_text(
+            json.dumps(manifest, indent=2), encoding="utf-8")
     return summary
 
 
@@ -480,7 +487,8 @@ def write_manifest() -> dict:
         for line in checksum_file.read_text(encoding="utf-8").splitlines():
             parts = line.split()
             if len(parts) == 2:
-                data_sha[parts[1]] = parts[0]
+                path = DATA_DIR / parts[1]
+                data_sha[parts[1]] = _sha256(path)
 
     manifest = {
         "protocol_version": PROTOCOL_VERSION,

@@ -101,3 +101,15 @@ def test_degenerate_inputs_and_validation():
     for kwargs in ({"lam": 0}, {"dthr": np.nan}, {"max_rules": 0}):
         with pytest.raises(ValueError):
             DENFIS(**kwargs)
+
+
+def test_one_rule_rls_matches_regularised_least_squares():
+    rng = np.random.default_rng(8)
+    X = rng.normal(size=(80, 3))
+    y = .01 + X @ np.array([.02, -.01, .03])
+    model = DENFIS(max_rules=1, lam=1, prediction_clip=None)
+    model.fit(X, y)
+    phi = np.c_[np.ones(len(X)), X]
+    expected = np.linalg.solve(phi.T @ phi + .01*np.eye(4), phi.T @ y)
+    np.testing.assert_allclose(model.coef_[0], expected, atol=1e-12)
+    assert np.linalg.eigvalsh(model.cov_[0]).min() > 0

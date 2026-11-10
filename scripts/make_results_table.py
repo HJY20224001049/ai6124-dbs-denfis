@@ -159,18 +159,20 @@ def _reading_notes(summary: pd.DataFrame, buy_hold: pd.DataFrame) -> list[str]:
 
 def main() -> None:
     summary = pd.read_csv(RESULTS_DIR / "summary.csv")
-    pooled = summary[summary["scope"] == "pooled"][COLUMNS].reset_index(drop=True)
-    holdout = summary[summary["scope"] == "holdout"][COLUMNS].reset_index(drop=True)
+    main_summary = summary[summary["model"].isin(["denfis_frozen", "xgboost", "lstm"])]
+    extensions = summary[~summary["model"].isin(["denfis_frozen", "xgboost", "lstm"])]
+    pooled = main_summary[main_summary["scope"] == "pooled"][COLUMNS].reset_index(drop=True)
+    holdout = main_summary[main_summary["scope"] == "holdout"][COLUMNS].reset_index(drop=True)
 
     bh = pd.DataFrame(_buy_and_hold_rows())
     trading_rows = []
 
-    pooled_trading = summary[summary["scope"] == "pooled"][TRADING_COLUMNS].copy()
+    pooled_trading = main_summary[main_summary["scope"] == "pooled"][TRADING_COLUMNS].copy()
     pooled_trading = pd.concat(
         [pooled_trading, bh[bh["scope"] == "pooled"][TRADING_COLUMNS]],
         ignore_index=True,
     )
-    holdout_trading = summary[summary["scope"] == "holdout"][TRADING_COLUMNS].copy()
+    holdout_trading = main_summary[main_summary["scope"] == "holdout"][TRADING_COLUMNS].copy()
     holdout_trading = pd.concat(
         [holdout_trading, bh[bh["scope"] == "holdout"][TRADING_COLUMNS]],
         ignore_index=True,
@@ -189,7 +191,15 @@ def main() -> None:
         "",
         markdown_table(pooled),
         "",
+        "## Extension: test-time online adaptation (reported separately)",
+        "",
+        "Predict first, update only after the label is realised. These models are not ranked in the frozen main comparison.",
+        "",
+        markdown_table(extensions[extensions["scope"] == "pooled"][COLUMNS]),
+        "",
         "## Holdout, 2026 Jan–Oct",
+        "",
+        "Baseline holdout artifacts predate the method-line handoff. DENFIS holdout remains pending the scheduled freeze; this table must not guide tuning.",
         "",
         markdown_table(holdout),
         "",
@@ -205,7 +215,7 @@ def main() -> None:
         "",
         "## Reading notes",
         "",
-        *[f"- {note}" for note in _reading_notes(summary, bh)],
+        *[f"- {note}" for note in _reading_notes(main_summary, bh)],
     ]
     output = "\n".join(text) + "\n"
 
