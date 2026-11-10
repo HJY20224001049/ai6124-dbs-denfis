@@ -12,6 +12,11 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+# The generated markdown contains characters (R², en dashes) that the default
+# Windows console encoding cannot print.  The file itself is always UTF-8.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 from config import PREDS_DIR, RESULTS_DIR  # noqa: E402
 from src.evaluation.backtest import annualized_return, max_drawdown, sharpe  # noqa: E402
 
@@ -53,10 +58,31 @@ def markdown_table(frame: pd.DataFrame) -> str:
     return "\n".join(lines)
 
 
+FOLDS = [f"r{rep}f{fold}" for rep in (1, 2, 3) for fold in (1, 2, 3)]
+
+
+def _reference_model() -> str:
+    """Any model with all nine folds plus the holdout; prefer the main model."""
+    required = set(FOLDS) | {"holdout"}
+    complete = []
+    for directory in sorted(PREDS_DIR.iterdir()):
+        if not directory.is_dir():
+            continue
+        present = {path.stem for path in directory.glob("*.csv")}
+        if required <= present:
+            complete.append(directory.name)
+    if not complete:
+        raise SystemExit("No model has all nine folds and the holdout on disk.")
+    for preferred in ("denfis_frozen", "xgboost", "lstm"):
+        if preferred in complete:
+            return preferred
+    return complete[0]
+
+
 def _buy_and_hold_rows() -> list[dict]:
     """Buy-and-hold on the same test dates as the models."""
     rows = []
-    model_dir = PREDS_DIR / "xgboost"
+    model_dir = PREDS_DIR / _reference_model()
     regular = sorted(model_dir.glob("r*f*.csv"))
     sets = {
         "pooled": [pd.read_csv(path) for path in regular],
@@ -80,6 +106,57 @@ def _buy_and_hold_rows() -> list[dict]:
     return rows
 
 
+def _reading_notes(summary: pd.DataFrame, buy_hold: pd.DataFrame) -> list[str]:
+    """Generate interpretation notes from the current result table."""
+    pooled = summary[summary["scope"] == "pooled"].set_index("model")
+    notes: list[str] = []
+    if pooled.empty:
+        return notes
+
+    r2_text = ", ".join(f"{model} {pooled.loc[model, 'r2']:.4f}" for model in pooled.index)
+    positive = [model for model in pooled.index if pooled.loc[model, "r2"] > 0]
+    if positive:
+        notes.append(
+            f"Pooled R² is positive for {', '.join(positive)} and negative for the "
+            f"others ({r2_text}); the test years are not uniformly favourable."
+        )
+    else:
+        notes.append(
+            f"Pooled R² is below zero for every model ({r2_text}): next-day log "
+            "returns are close to unpredictable with this feature set."
+        )
+
+    sharpe_text = ", ".join(
+        f"{model} {pooled.loc[model, 'sharpe']:.2f} "
+        f"(exposure {pooled.loc[model, 'exposure']:.0%})"
+        for model in pooled.sort_values("sharpe", ascending=False).index
+    )
+    notes.append(f"Pooled Sharpe ranking: {sharpe_text}.")
+
+    da_text = ", ".join(
+        f"{model} {pooled.loc[model, 'da']:.3f}" for model in pooled.index
+    )
+    notes.append(f"Directional accuracy: {da_text} (0.5 is a coin flip).")
+
+    bh_pooled = buy_hold[buy_hold["scope"] == "pooled"]
+    if not bh_pooled.empty:
+        bh_dd = float(bh_pooled["max_dd"].iloc[0])
+        dd_text = ", ".join(
+            f"{model} {pooled.loc[model, 'max_dd']:.1%}" for model in pooled.index
+        )
+        notes.append(
+            f"Pooled maximum drawdown: {dd_text}, versus {bh_dd:.1%} for buy & hold. "
+            "Lower drawdown only counts as an improvement if the Sharpe is not "
+            "sacrificed."
+        )
+
+    notes.append(
+        "The 2026 holdout is a single period reported separately; it is not used "
+        "for model selection and should not be treated as a second validation set."
+    )
+    return notes
+
+
 def main() -> None:
     summary = pd.read_csv(RESULTS_DIR / "summary.csv")
     pooled = summary[summary["scope"] == "pooled"][COLUMNS].reset_index(drop=True)
@@ -99,8 +176,14 @@ def main() -> None:
         ignore_index=True,
     )
 
+    has_denfis = (
+        summary["model"].astype(str).str.startswith("denfis").any()
+        if not summary.empty
+        else False
+    )
+    title = "# Results" if has_denfis else "# Baseline results"
     text = [
-        "# Baseline results",
+        title,
         "",
         "## Pooled, 2017–2025",
         "",
@@ -122,16 +205,7 @@ def main() -> None:
         "",
         "## Reading notes",
         "",
-        "- Both models have pooled R² below zero and directional accuracy near 50%: "
-        "next-day log returns are close to unpredictable at this feature set.",
-        "- LSTM has the higher pooled Sharpe (0.41 vs 0.24) because it trades less "
-        "(31% exposure vs 54%) and takes a lower turnover; XGBoost has the higher "
-        "directional accuracy (0.508 vs 0.485).",
-        "- Both long/flat strategies cut maximum drawdown relative to buy & hold "
-        "(27.5% and 32.2% vs 38.6%) but give up most of the upside: buy & hold has "
-        "a pooled Sharpe of 1.11 and 465% cumulative return over 2017–2025.",
-        "- The 2026 holdout is a single favourable period for both models; it is "
-        "reported separately and is not used for model selection.",
+        *[f"- {note}" for note in _reading_notes(summary, bh)],
     ]
     output = "\n".join(text) + "\n"
 

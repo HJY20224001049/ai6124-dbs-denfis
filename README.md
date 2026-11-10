@@ -18,9 +18,11 @@ Internal workplans and the course proposal are kept out of this repository.
 
 - [x] Proposal submitted (2026-10-14)
 - [x] Data pipeline and cached data (D05.SI 4,219 rows; ^STI 4,210 rows)
-- [x] 13-feature, 9-fold walk-forward, metrics and backtest modules, 22 tests
+- [x] 13-feature, 9-fold walk-forward, metrics and backtest modules, 36 tests
 - [x] XGBoost and LSTM baselines on all 9 folds
 - [x] Buy-and-hold comparison, leakage audit (97 checks, 0 failures)
+- [x] DM tests, bootstrap Sharpe CIs, model-agnostic result tables
+- [x] ^STI transfer alignment helper for the method workstream
 - [ ] DENFIS implementation (frozen + online)
 - [ ] Final notebook and slides (due 2026-11-18 23:59)
 
@@ -50,8 +52,13 @@ python scripts/run_baseline.py --model lstm --folds all
 python scripts/run_baseline.py --model xgboost --folds r1f1   # one fold
 python scripts/make_results_table.py                # docs/results_table.md
 python scripts/plot_results.py                      # equity and DA figures
+python scripts/statistical_tests.py                 # docs/statistical_tests.md
 python scripts/leakage_audit.py                     # docs/leakage_audit.md
 ```
+
+Once `src/models/denfis.py` lands, the runner already exposes
+`--model denfis_frozen` and `--model denfis_online` (lazy import; both search
+the protocol's `Dthr × λ` grid).
 
 Data are downloaded from the Yahoo Finance chart endpoint (the same daily
 OHLCV and adjusted-close fields returned by `yfinance`); the cache is what the
@@ -64,6 +71,7 @@ config.py                 # single source of truth (to be added on D0)
 data/raw/                 # cached D05.SI and ^STI CSV files
 src/data.py               # loading, cleaning
 src/features.py           # 13 causal features
+src/transfer.py           # ^STI ↔ DBS alignment for transfer experiments
 src/splits.py             # 9 walk-forward folds + 2026 holdout + purge
 src/models/denfis.py      # DENFIS implementation
 src/models/baselines.py   # XGBoost, LSTM

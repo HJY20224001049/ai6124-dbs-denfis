@@ -34,7 +34,8 @@
 
 ## Reading notes
 
-- Both models have pooled R² below zero and directional accuracy near 50%: next-day log returns are close to unpredictable at this feature set.
-- LSTM has the higher pooled Sharpe (0.41 vs 0.24) because it trades less (31% exposure vs 54%) and takes a lower turnover; XGBoost has the higher directional accuracy (0.508 vs 0.485).
-- Both long/flat strategies cut maximum drawdown relative to buy & hold (27.5% and 32.2% vs 38.6%) but give up most of the upside: buy & hold has a pooled Sharpe of 1.11 and 465% cumulative return over 2017–2025.
-- The 2026 holdout is a single favourable period for both models; it is reported separately and is not used for model selection.
+- Pooled R² is below zero for every model (lstm -0.0156, xgboost -0.0098): next-day log returns are close to unpredictable with this feature set.
+- Pooled Sharpe ranking: lstm 0.41 (exposure 31%), xgboost 0.24 (exposure 54%).
+- Directional accuracy: lstm 0.484, xgboost 0.508 (0.5 is a coin flip).
+- Pooled maximum drawdown: lstm 27.5%, xgboost 32.2%, versus 38.6% for buy & hold. Lower drawdown only counts as an improvement if the Sharpe is not sacrificed.
+- The 2026 holdout is a single period reported separately; it is not used for model selection and should not be treated as a second validation set.

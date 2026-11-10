@@ -114,6 +114,16 @@ DENFIS_LAMBDA_GRID = (0.95, 0.98, 0.99, 1.0)
 DENFIS_MAX_RULES = 200
 DENFIS_MERGE_FACTOR = 0.5
 
+# Parameter dictionaries passed to the DENFIS constructor.  Keys are the
+# interface contract with the method workstream (WORKPLAN_A): ``dthr`` and
+# ``lam`` are the two searched knobs; ``max_rules``, ``merge_factor`` and
+# ``seed`` are fixed from the constants above.
+DENFIS_GRID = [
+    {"dthr": dthr, "lam": lam}
+    for dthr in DENFIS_DTHR_GRID
+    for lam in DENFIS_LAMBDA_GRID
+]
+
 # Daily returns carry little signal, so the first grid version stopped at one
 # tree on the 2016 validation year.  The revised grid searches stronger
 # regularisation as well; validation RMSE then bottoms out after 100+ trees.
