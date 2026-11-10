@@ -79,10 +79,11 @@ class DENFIS:
         self.mass_ = np.append(self.mass_, 0.0)
         self.target_sum_ = np.append(self.target_sum_, 0.0)
 
-    def _ecm_update(self, x: np.ndarray) -> None:
+    def _ecm_update(self, x: np.ndarray) -> int | None:
         if not self.n_rules_:
             self._new_rule(x)
-            return
+            return 0
+        changed = None
         distances = np.sqrt(np.mean((self.centers_ - x) ** 2, axis=1))
         inside = np.flatnonzero(distances <= self.radii_ + 1e-12)
         if len(inside):
@@ -93,7 +94,7 @@ class DENFIS:
             if extended[index] > 2 * self.dthr:
                 if self.n_rules_ < self.max_rules:
                     self._new_rule(x)
-                    return
+                    return self.n_rules_ - 1
                 # Bounded-memory extension: preserve antecedents at the cap.
                 index = int(np.argmin(distances))
                 self.cap_hits_ += 1
@@ -102,11 +103,21 @@ class DENFIS:
                 shift = (distances[index] - radius) / max(distances[index], 1e-12)
                 self.centers_[index] += shift * (x - self.centers_[index])
                 self.radii_[index] = radius
+                changed = index
         self.support_[index] += 1
+        return changed
 
-    def _merge_rules(self) -> None:
+    def _merge_rules(self, affected: int | None = None) -> None:
         if self.merge_factor == 0:
             return
+        if affected is not None:
+            # The previous state has no eligible pair. Only a newly created
+            # or moved centre can introduce one; avoid an O(K^2 d) scan when
+            # its O(K d) distance check already excludes a merge.
+            distance = np.sqrt(np.mean((self.centers_ - self.centers_[affected]) ** 2, axis=1))
+            distance[affected] = np.inf
+            if np.min(distance) >= self.merge_factor * self.dthr:
+                return
         while self.n_rules_ > 1:
             distance = np.sqrt(np.mean(
                 (self.centers_[:, None] - self.centers_[None, :]) ** 2, axis=2
@@ -206,7 +217,8 @@ class DENFIS:
         if np.ndim(y) != 0 or not np.isfinite(y):
             raise ValueError("y must be a finite scalar")
         if self.evolve_rules:
-            self._ecm_update(x)
-            self._merge_rules()
+            affected = self._ecm_update(x)
+            if affected is not None:
+                self._merge_rules(affected=affected)
         self._update_consequents(x, float(y))
         self.rule_history_.append(self.n_rules_)

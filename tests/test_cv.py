@@ -168,3 +168,44 @@ def test_online_runner_predicts_before_realised_label_update():
     for i, target in enumerate(frame.iloc[fold.test_idx][TARGET_COL]):
         assert events[2*i] == ("predict", 1)
         assert events[2*i+1] == ("update", float(target))
+
+
+def test_equal_validation_rmse_prefers_fewer_rules_then_larger_threshold():
+    frame = _frame()
+    fold = get_fold(make_folds_from_frame(frame), "r1f1")
+
+    def factory(params, seed):
+        model = DummyModel(params, seed)
+        model.n_rules_ = params["rules"]
+        return model
+
+    grid = [{"rules": 10, "dthr": 1.5}, {"rules": 2, "dthr": .25},
+            {"rules": 2, "dthr": 1.0}]
+    _, metrics = run_fold("tie", factory, fold, frame, grid, seed=42)
+    assert metrics["params"] == {"rules": 2, "dthr": 1.0}
+
+
+def test_source_only_selection_does_not_use_target_validation_labels():
+    frame = _frame()
+    source = frame.copy()
+    source[TARGET_COL] = .001
+    frame[TARGET_COL] = -.01
+    fold = get_fold(make_folds_from_frame(frame), "r1f1")
+
+    class FixedModel:
+        def __init__(self, value):
+            self.value = value
+
+        def fit(self, X, y):
+            pass
+
+        def predict(self, X):
+            return np.full(len(X), self.value)
+
+    grid = [{"value": .001}, {"value": -.01}]
+    factory = lambda p, seed: FixedModel(p["value"])
+    _, source_metrics = run_fold("zero_shot", factory, fold, frame, grid,
+                                 seed=42, selection_frame=source)
+    _, target_metrics = run_fold("scratch", factory, fold, frame, grid, seed=42)
+    assert source_metrics["params"] == {"value": .001}
+    assert target_metrics["params"] == {"value": -.01}

@@ -120,13 +120,21 @@ def run_fold(
     cost_bps: float = COST_BPS,
     tau_grid=TAU_GRID,
     sequence_len: int | None = None,
+    selection_frame: pd.DataFrame | None = None,
 ) -> tuple[pd.DataFrame, dict]:
     """Run one fold and return the prediction frame plus a metrics dict."""
     if sequence_len is not None and online:
         raise NotImplementedError("online sequence models are not supported")
+    if selection_frame is not None and sequence_len is not None:
+        raise NotImplementedError("separate selection market requires tabular inputs")
 
-    select_train = frame.iloc[fold.select_train_idx]
-    val = frame.iloc[fold.val_idx]
+    selection_data = frame if selection_frame is None else selection_frame
+    if len(selection_data) != len(frame) or not np.array_equal(
+        selection_data["label_date"].to_numpy(), frame["label_date"].to_numpy()
+    ):
+        raise ValueError("selection and target frames must align on label_date")
+    select_train = selection_data.iloc[fold.select_train_idx]
+    val = selection_data.iloc[fold.val_idx]
     final_train = frame.iloc[fold.train_idx]
     test = frame.iloc[fold.test_idx]
     y_all = frame[TARGET_COL].to_numpy(dtype=np.float64)

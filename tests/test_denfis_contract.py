@@ -113,3 +113,21 @@ def test_one_rule_rls_matches_regularised_least_squares():
     expected = np.linalg.solve(phi.T @ phi + .01*np.eye(4), phi.T @ y)
     np.testing.assert_allclose(model.coef_[0], expected, atol=1e-12)
     assert np.linalg.eigvalsh(model.cov_[0]).min() > 0
+
+
+def test_incremental_merge_screen_matches_full_pairwise_reference():
+    class FullScan(DENFIS):
+        def partial_fit(self, x, y):
+            self._ecm_update(x)
+            self._merge_rules()
+            self._update_consequents(x, y)
+            self.rule_history_.append(self.n_rules_)
+
+    X, y = _data()
+    a = DENFIS(dthr=.4, evolve_rules=True, max_rules=15)
+    b = FullScan(dthr=.4, evolve_rules=True, max_rules=15)
+    for model in (a, b):
+        model.fit(X[:100], .01*y[:100])
+        for x, target in zip(X[100:], .01*y[100:]):
+            model.partial_fit(x, target)
+    _assert_state_equal(a.__dict__, b.__dict__)

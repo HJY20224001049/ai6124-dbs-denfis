@@ -61,7 +61,14 @@ def main():
             assert pd.Timestamp(metrics['source_final_end']) <= fold.final_train_end
             assert pd.Timestamp(metrics['source_final_end']) < pd.Timestamp(metrics['test_start'])
             assert metrics['test_adaptation'] is False
+            if protocol == 'zero_shot':
+                assert metrics['selection_market'] == 'STI'
             rows += check_predictions(ROOT/'results/transfer/preds'/protocol/f'{fid}.csv', metrics, transfer, fold)
+            count += 1
+    for variant in ('no_rls', 'no_merge'):
+        for fid in ('r1f1', 'r2f2', 'r3f3'):
+            metrics = json.loads((ROOT/'results/analysis/metrics'/variant/f'{fid}.json').read_text())
+            rows += check_predictions(ROOT/'results/analysis/preds'/variant/f'{fid}.csv', metrics, frame, folds[fid])
             count += 1
     report = {'prediction_files':count,'prediction_rows_checked':rows,
               'regular_folds_per_main_model':9,'transfer_protocols':3,
