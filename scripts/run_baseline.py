@@ -26,7 +26,6 @@ from config import (  # noqa: E402
 from src.data import load_prices  # noqa: E402
 from src.evaluation.cv import run_model_on_folds  # noqa: E402
 from src.features import compute_features  # noqa: E402
-from src.models.baselines import LSTMModel, XGBModel  # noqa: E402
 from src.splits import make_folds_from_frame  # noqa: E402
 
 
@@ -58,9 +57,16 @@ def _denfis_factory(evolve_rules: bool = False):
     return factory
 
 
+def _baseline_factory(name):
+    def factory(params, seed):
+        from src.models.baselines import LSTMModel, XGBModel
+        return {"xgboost": XGBModel, "lstm": LSTMModel}[name](params, seed)
+    return factory
+
+
 MODELS = {
-    "xgboost": (lambda params, seed: XGBModel(params, seed), XGB_GRID, False, None),
-    "lstm": (lambda params, seed: LSTMModel(params, seed), LSTM_CONFIGS, False, 20),
+    "xgboost": (_baseline_factory("xgboost"), XGB_GRID, False, None),
+    "lstm": (_baseline_factory("lstm"), LSTM_CONFIGS, False, 20),
     "denfis_frozen": (_denfis_factory(), DENFIS_GRID, False, None),
     "denfis_online": (_denfis_factory(evolve_rules=True), DENFIS_GRID, True, None),
 }

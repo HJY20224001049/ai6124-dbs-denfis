@@ -18,6 +18,8 @@ from __future__ import annotations
 import hashlib
 import json
 import subprocess
+import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -149,6 +151,9 @@ def run_fold(
     best_params: dict | None = None
     best_val_pred: np.ndarray | None = None
     best_score = np.inf
+    best_tie = (np.inf, np.inf)
+    search_results = []
+    started = time.perf_counter()
 
     for params in param_grid:
         model = model_factory(params, seed)
@@ -157,9 +162,15 @@ def run_fold(
         else:
             model.fit(X_select, y_select)
         pred_val = np.asarray(model.predict(X_val), dtype=np.float64)
+        if not np.isfinite(pred_val).all() or pred_val.shape != y_val.shape:
+            raise ValueError(f"{fold.fold_id}: invalid validation predictions")
         score = _mae_rmse(y_val, pred_val)
-        if score < best_score:
+        tie = (getattr(model, "n_rules_", np.inf), -float(params.get("dthr", 0)))
+        search_results.append({"params": dict(params), "val_rmse": score,
+                               "n_rules": getattr(model, "n_rules_", None)})
+        if score < best_score or (score == best_score and tie < best_tie):
             best_score = score
+            best_tie = tie
             best_model = model
             best_params = dict(params)
             best_val_pred = pred_val
@@ -212,6 +223,9 @@ def run_fold(
     else:
         pred_test = np.asarray(final_model.predict(X_test), dtype=np.float64)
 
+    if pred_test.shape != y_test.shape or not np.isfinite(pred_test).all():
+        raise ValueError(f"{fold.fold_id}: invalid test predictions")
+
     # --- metrics and backtest ---
     metrics = compute_metrics(y_test, pred_test)
     signal = make_signal(pred_test, tau)
@@ -228,8 +242,19 @@ def run_fold(
             "tau": float(tau),
             "seed": int(seed),
             "params": final_params,
+            "validation_rmse": float(best_score),
+            "search_results": search_results,
+            "elapsed_seconds": time.perf_counter() - started,
         }
     )
+    if hasattr(final_model, "n_rules_"):
+        metrics.update({
+            "n_rules": int(final_model.n_rules_),
+            "rule_history": list(final_model.rule_history_),
+            "covariance_resets": int(final_model.resets_),
+            "cap_hits": int(final_model.cap_hits_),
+            "merges": int(final_model.merges_),
+        })
 
     pred_frame = pd.DataFrame(
         {
@@ -455,11 +480,13 @@ def write_manifest() -> dict:
         "protocol_version": PROTOCOL_VERSION,
         "config_hash": _sha256(PROJECT_ROOT / "config.py"),
         "git_commit": _git_commit(),
-        "python": subprocess.check_output(
-            ["python", "--version"], stderr=subprocess.STDOUT
-        )
-        .decode("utf-8")
-        .strip(),
+        "python": sys.version,
+        "executable": sys.executable,
+        "source_sha256": {
+            str(path.relative_to(PROJECT_ROOT)): _sha256(path)
+            for root in ("src", "scripts")
+            for path in sorted((PROJECT_ROOT / root).rglob("*.py"))
+        },
         "packages": _package_versions(),
         "data_sha256": data_sha,
         "generated_at": datetime.now(timezone.utc).isoformat(),
