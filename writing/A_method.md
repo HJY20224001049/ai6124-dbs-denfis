@@ -269,7 +269,9 @@ Transfer analysis uses three chronological folds and three protocols: DBS-only
 scratch training, STI-only zero-shot prediction, and STI pretraining followed by
 DBS training-window adaptation. Both market frames are aligned by label date.
 Each market fits its own scaler on the source or target training window used
-at that stage. No source labels extend past the corresponding target cutoff.
+at that stage. No source labels extend past the corresponding target cutoff. Strict zero-shot
+parameter and trading-threshold selection also uses STI validation labels only;
+it never uses DBS validation labels. Scratch and fine-tune use DBS validation.
 Consequently, the rules are transferred between separately standardised spaces,
 which assumes that corresponding feature coordinates describe sufficiently
 related states. STI volume is often zero, weakening the interpretation of its
@@ -313,3 +315,71 @@ and contributes no main-result evidence. Transfer across related assets is a
 more modest first extension, and even there a negative result can be informative:
 shared macroeconomic exposure does not imply that the same standardised local
 return relationship transfers unchanged.
+
+## Preliminary nine-fold evidence (to be locked at the scheduled freeze)
+
+The saved frozen run covers 2,258 out-of-sample predictions. Its pooled RMSE is
+0.012066, MAE is 0.008564, R-squared is −0.0194, and directional accuracy is
+0.5009. These values provide no basis for claiming strong next-day forecasting
+skill. In particular, pooled RMSE is not lower than the historical XGBoost or
+LSTM scores, and R-squared remains below zero. The model can represent nonlinear
+synthetic data while still failing to extract a reliable forecasting advantage
+from this financial task; these are different empirical questions.
+
+Frozen DENFIS has a strategy Sharpe of 0.6541 and annualised return of 0.0701,
+with maximum drawdown 0.2026 and exposure 0.3437. Its Sharpe point estimate is
+larger than the historical XGBoost value of 0.2376 and LSTM value of 0.4066,
+but smaller than buy-and-hold's 1.1125. Reduced exposure and drawdown therefore
+need to be presented alongside the return sacrificed relative to remaining
+invested. A point-estimate strategy ranking is not an independent demonstration
+of superior forecast accuracy, and it should not be used to reopen the search
+space after seeing the test years.
+
+The stationary-bootstrap 95% interval for frozen Sharpe is approximately
+[−0.041, 1.309]. It includes zero. The corresponding squared-error DM comparison
+with XGBoost gives a positive statistic of 1.2306 and p=0.2185. A positive
+statistic means frozen DENFIS has larger average squared loss in the aligned
+sample, but the test does not reject equal mean loss at the conventional 5%
+level. Failure to reject is not proof of equality or equivalence. The comparison
+is exploratory, the reference baseline is chosen by pooled RMSE, and multiple
+comparisons are not adjusted. These qualifications belong with the reported
+numbers rather than being omitted from the conclusion.
+
+The online extension does not improve this pooled comparison. Its RMSE is
+0.012185, directional accuracy 0.5018, and strategy Sharpe 0.2595. Online Sharpe's
+bootstrap interval is approximately [−0.413, 0.889]. Against frozen DENFIS, the
+DM statistic is 1.0932 with p=0.2743. Thus continuous adaptation supplies no
+statistically established improvement in this experiment. Possible explanations
+include noisy daily labels and transient local updates, but the present study
+does not isolate those mechanisms. The conservative statement is simply that
+the implemented adaptation failed to improve the observed pooled scores.
+
+Frozen fitting took approximately 225 seconds across the nine folds in the
+recorded environment. Final rule counts range from 11 to 200, with three folds
+reaching the configured cap and no final-fit covariance resets. One fold records
+a merge, while most record none. These diagnostics explain why a no-merge ablation
+may coincide with the full model in some folds: an available mechanism need not
+actually be exercised in a particular fitted run. They also show that bounded
+memory is a substantive modelling approximation for some years, not merely a
+hypothetical safeguard. Runtime measurements are environment-specific and do
+not guarantee a particular speed on another machine.
+
+The baseline comparisons, frozen/online result tables, and statistical report
+are generated from saved predictions. They remain preliminary until the planned
+joint review and freeze. Instructor consultation, final holdout evaluation,
+combined-notebook integration and the actual timed rehearsal have not yet taken
+place. Keeping those events distinct from completed code execution makes the
+handoff auditable and leaves the final presentation grounded in work that has
+actually been done.
+
+The ablation diagnostics also caution against crediting complexity automatically.
+On r1f1 and r2f2, the weighted-constant variant has lower RMSE than the full local
+linear model; on r3f3 its RMSE is slightly higher. Its strategy Sharpe is larger
+on those three folds, but these selected examples do not establish a nine-fold
+improvement. We also add r2f1 as a diagnostic fourth fold because it actually
+exercises merging. Disabling merging there increases the final count from 66
+to 67 and changes RMSE only slightly, from approximately 0.018200 to 0.018206.
+The planned three representative folds have no final-fit merges, so identical
+no-merge scores on them are expected. This additional fold is explanatory,
+not a new main-model selection criterion. The complete variant table is saved
+in `results/analysis/ablations.csv`.

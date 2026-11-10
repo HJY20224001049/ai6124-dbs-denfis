@@ -35,7 +35,9 @@ def main():
     representative = ["r1f1", "r2f2", "r3f3"]
     sensitivity, ablations = [], []
     fig, axes = plt.subplots(1, 2, figsize=(9, 3.5))
-    for fid in representative:
+    # Include the merge-active fold, otherwise disabling merge is an identity
+    # operation in all three planned representative fits.
+    for fid in ("r1f1", "r2f1", "r2f2", "r3f3"):
         metadata = json.loads((ROOT / "results/metrics/denfis_frozen" / f"{fid}.json").read_text())
         for row in metadata["search_results"]:
             sensitivity.append({"fold_id": fid, **row["params"],

@@ -18,12 +18,14 @@ Internal workplans and the course proposal are kept out of this repository.
 
 - [x] Proposal submitted (2026-10-14)
 - [x] Data pipeline and cached data (D05.SI 4,219 rows; ^STI 4,210 rows)
-- [x] 13-feature, 9-fold walk-forward, metrics and backtest modules, 36 tests
+- [x] 13-feature, 9-fold walk-forward, metrics and backtest modules; method contracts included
 - [x] XGBoost and LSTM baselines on all 9 folds
-- [x] Buy-and-hold comparison, leakage audit (97 checks, 0 failures)
+- [x] Buy-and-hold comparison and leakage audit (see `docs/leakage_audit.md`)
 - [x] DM tests, bootstrap Sharpe CIs, model-agnostic result tables
 - [x] ^STI transfer alignment helper for the method workstream
-- [ ] DENFIS implementation (frozen + online)
+- [x] DENFIS implementation and nine-fold predictions (frozen + online)
+- [x] Method report, integration notebook and five-slide draft (`writing/`)
+- [ ] Joint review, consultation decisions, scheduled freeze and final holdout
 - [ ] Final notebook and slides (due 2026-11-18 23:59)
 
 Current pooled result (2017–2025, 10 bp one-way cost):
@@ -32,15 +34,25 @@ Current pooled result (2017–2025, 10 bp one-way cost):
 |---|---|---|---|---|---|
 | XGBoost | 0.0120 | 0.508 | 0.238 | 32.2% | 53.6% |
 | LSTM | 0.0120 | 0.485 | 0.407 | 27.5% | 30.7% |
+| DENFIS frozen | 0.0121 | 0.501 | 0.654 | 20.3% | 34.4% |
 | buy & hold | — | — | 1.113 | 38.6% | 100% |
 
-Both models have R² below zero and directional accuracy near 50%. They reduce
+All main models have pooled R² below zero and directional accuracy near 50%. They reduce
 drawdown but give up most of the upside versus buy & hold. This is the honest
-starting point for the DENFIS comparison, not a result to overclaim.
+comparison to report without overclaiming.
 
-The 2026 holdout is kept untouched until results are frozen.
+The online extension is reported separately: pooled RMSE 0.012185 and Sharpe
+0.260, below frozen DENFIS on this run. DM comparisons are not significant;
+see `docs/statistical_tests.md`. Method-line handoff: [docs/handoff_to_B.md](docs/handoff_to_B.md).
+
+DENFIS 2026 holdout remains reserved until the scheduled freeze. Baseline
+holdout artifacts predate this handoff and must not guide further tuning.
 
 ## Quick start
+
+Use Python 3.11 and install `requirements.txt` in a virtual environment.
+DENFIS does not import baseline dependencies unless a baseline is requested.
+For notebook/slide generation, also install `requirements-deliverables.txt`.
 
 ```bash
 python -m src.data                                  # download and cache data
@@ -56,7 +68,7 @@ python scripts/statistical_tests.py                 # docs/statistical_tests.md
 python scripts/leakage_audit.py                     # docs/leakage_audit.md
 ```
 
-Once `src/models/denfis.py` lands, the runner already exposes
+The implemented `src/models/denfis.py` is exposed through
 `--model denfis_frozen` and `--model denfis_online` (lazy import; both search
 the protocol's `Dthr × λ` grid).
 
@@ -67,7 +79,7 @@ final notebook reads. No network access is needed after `python -m src.data`.
 ## Repository layout
 
 ```text
-config.py                 # single source of truth (to be added on D0)
+config.py                 # single source of truth
 data/raw/                 # cached D05.SI and ^STI CSV files
 src/data.py               # loading, cleaning
 src/features.py           # 13 causal features

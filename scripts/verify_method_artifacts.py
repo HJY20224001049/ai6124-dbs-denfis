@@ -10,9 +10,11 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from config import COST_BPS, TARGET_COL
+from config import COST_BPS, FEATURES, TARGET_COL
 from src.data import load_prices
 from src.features import compute_features
+from src.features import fit_scaler, transform_scaler
+from src.models.denfis import DENFIS
 from src.splits import make_folds_from_frame
 from src.transfer import load_transfer_frames
 from src.evaluation.backtest import run_backtest
@@ -49,6 +51,23 @@ def main():
             assert len(metrics['search_results']) == 20
             assert metrics['validation_rmse'] == min(x['val_rmse'] for x in metrics['search_results'])
             rows += check_predictions(directory/f'{fid}.csv', metrics, frame, fold)
+            # Replay only the saved winner, not another hyperparameter search.
+            train, test = frame.iloc[fold.train_idx], frame.iloc[fold.test_idx]
+            scaler = fit_scaler(train[FEATURES])
+            X_train = transform_scaler(train[FEATURES], scaler)
+            X_test = transform_scaler(test[FEATURES], scaler)
+            replay = DENFIS(**metrics['params'], seed=metrics['seed'],
+                            evolve_rules=model == 'denfis_online')
+            replay.fit(X_train, train[TARGET_COL].to_numpy())
+            if model == 'denfis_online':
+                predictions = []
+                for x, y in zip(X_test, test[TARGET_COL]):
+                    predictions.append(replay.predict(x[None])[0])
+                    replay.partial_fit(x, float(y))
+            else:
+                predictions = replay.predict(X_test)
+            saved = pd.read_csv(directory/f'{fid}.csv')
+            np.testing.assert_allclose(predictions, saved.y_pred, atol=1e-10, rtol=0)
             count += 1
     transfer = load_transfer_frames()['DBS']
     transfer_folds = {f.fold_id:f for f in make_folds_from_frame(transfer)}
@@ -66,13 +85,14 @@ def main():
             rows += check_predictions(ROOT/'results/transfer/preds'/protocol/f'{fid}.csv', metrics, transfer, fold)
             count += 1
     for variant in ('no_rls', 'no_merge'):
-        for fid in ('r1f1', 'r2f2', 'r3f3'):
+        for fid in ('r1f1', 'r2f1', 'r2f2', 'r3f3'):
             metrics = json.loads((ROOT/'results/analysis/metrics'/variant/f'{fid}.json').read_text())
             rows += check_predictions(ROOT/'results/analysis/preds'/variant/f'{fid}.csv', metrics, frame, folds[fid])
             count += 1
     report = {'prediction_files':count,'prediction_rows_checked':rows,
               'regular_folds_per_main_model':9,'transfer_protocols':3,
               'transfer_folds_per_protocol':3,'denfis_holdout_run':False,
+              'selected_model_replays':18,
               'checks':'date/target alignment; finite values; RMSE; signal threshold; cost ledger; rule cap; selection records; source cutoffs; online history',
               'status':'PASS'}
     (ROOT/'docs/method_acceptance.json').write_text(json.dumps(report,indent=2)+'\n')

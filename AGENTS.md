@@ -5,7 +5,7 @@
 本项目使用 Python 预测星展银行（DBS）股票的次日收益率，并将 DENFIS 与 XGBoost、LSTM 基线进行比较。修改实验行为前先阅读 `PROTOCOL.md`；特征、数据折、随机种子、路径和交易假设统一定义在 `config.py`。
 
 - `src/`：数据加载、因果特征、时间划分与迁移数据对齐。
-- `src/models/`：模型接口与基线；DENFIS 实现尚待完成。
+- `src/models/`：模型接口、DENFIS 与基线实现。
 - `src/evaluation/`：滚动前推交叉验证、指标、回测与统计检验。
 - `scripts/`：实验运行、审计、绘图与报告生成脚本。
 - `tests/`：使用 pytest 编写的接口契约与数据泄漏测试。
@@ -16,7 +16,7 @@
 所有命令均在仓库根目录执行；项目没有单独的构建步骤。
 
 ```bash
-python -m venv .venv
+python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
 python -m src.data                           # 下载并缓存行情

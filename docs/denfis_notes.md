@@ -63,7 +63,9 @@ and P=100 I. Repeated minimum-pair merging stops when no eligible pair remains.
 
 For N examples, K<=200 rules and d features, fitting costs O(N K d^2),
 prediction O(N K d), covariance storage O(K d^2). Pairwise merging requires
-O(K^2 d) per scan; online updates incur this cost too. No random shuffle is
+O(K^2 d) per scan. Online updates first screen the moved/new centre in O(K d);
+unchanged geometry cannot introduce a new eligible pair. A differential test
+checks equality with unconditional full scans. No random shuffle is
 used, so the seed interface is deterministic without drawing random numbers.
 
 ## Evidence and limitations
