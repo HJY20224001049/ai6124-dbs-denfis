@@ -53,6 +53,22 @@ class DummySeqModel(DummyModel):
         return np.full(len(X), self.mean_, dtype=np.float64)
 
 
+def test_naive_zero_model_contract():
+    from src.models.baselines import NaiveZeroModel
+
+    model = NaiveZeroModel()
+    X = np.zeros((5, len(FEATURES)))
+    model.fit(X, np.full(5, 0.01))
+    pred = model.predict(X)
+    assert pred.shape == (5,)
+    np.testing.assert_array_equal(pred, np.zeros(5))
+    model.partial_fit(X[0], 0.01)
+    np.testing.assert_array_equal(model.predict(X), np.zeros(5))
+
+    sequences = np.zeros((4, 20, len(FEATURES)))
+    np.testing.assert_array_equal(model.predict(sequences), np.zeros(4))
+
+
 def test_build_sequences_is_causal_and_padded():
     full = np.arange(40 * 3, dtype=float).reshape(40, 3)
     sequences, valid = build_sequences(full, np.array([0, 5, 25, 30]), seq_len=10)

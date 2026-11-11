@@ -1,6 +1,6 @@
 # Leakage audit
 
-Checks: 133; failures: 0
+Checks: 151; failures: 0
 
 | Check | Result | Detail |
 |---|---|---|
@@ -116,6 +116,24 @@ Checks: 133; failures: 0
 | lstm/r3f2: finite predictions | PASS |  |
 | lstm/r3f3: dates and y align | PASS | 252 rows |
 | lstm/r3f3: finite predictions | PASS |  |
+| no_prediction/r1f1: dates and y align | PASS | 250 rows |
+| no_prediction/r1f1: finite predictions | PASS |  |
+| no_prediction/r1f2: dates and y align | PASS | 251 rows |
+| no_prediction/r1f2: finite predictions | PASS |  |
+| no_prediction/r1f3: dates and y align | PASS | 250 rows |
+| no_prediction/r1f3: finite predictions | PASS |  |
+| no_prediction/r2f1: dates and y align | PASS | 251 rows |
+| no_prediction/r2f1: finite predictions | PASS |  |
+| no_prediction/r2f2: dates and y align | PASS | 253 rows |
+| no_prediction/r2f2: finite predictions | PASS |  |
+| no_prediction/r2f3: dates and y align | PASS | 250 rows |
+| no_prediction/r2f3: finite predictions | PASS |  |
+| no_prediction/r3f1: dates and y align | PASS | 249 rows |
+| no_prediction/r3f1: finite predictions | PASS |  |
+| no_prediction/r3f2: dates and y align | PASS | 252 rows |
+| no_prediction/r3f2: finite predictions | PASS |  |
+| no_prediction/r3f3: dates and y align | PASS | 252 rows |
+| no_prediction/r3f3: finite predictions | PASS |  |
 | xgboost/holdout: dates and y align | PASS | 209 rows |
 | xgboost/holdout: finite predictions | PASS |  |
 | xgboost/r1f1: dates and y align | PASS | 250 rows |
@@ -136,4 +154,4 @@ Checks: 133; failures: 0
 | xgboost/r3f2: finite predictions | PASS |  |
 | xgboost/r3f3: dates and y align | PASS | 252 rows |
 | xgboost/r3f3: finite predictions | PASS |  |
-| at least one prediction file audited | PASS | 38 files |
+| at least one prediction file audited | PASS | 47 files |

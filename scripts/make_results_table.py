@@ -38,6 +38,33 @@ COLUMNS = [
 
 TRADING_COLUMNS = ["model", "n", "sharpe", "ann_ret", "max_dd", "turnover", "exposure"]
 
+MAIN_MODELS = ["denfis_frozen", "xgboost", "lstm"]
+NO_PREDICTION = "no_prediction"
+COMPARISON_COLUMNS = [
+    "model",
+    "n",
+    "rmse",
+    "rmse_zero",
+    "rmse_skill",
+    "mae",
+    "mae_zero",
+    "mae_skill",
+]
+
+
+def _comparison_rows(summary: pd.DataFrame) -> pd.DataFrame:
+    """Pooled forecast accuracy, with the no-prediction row first."""
+    pooled = summary[summary["scope"] == "pooled"]
+    order = [NO_PREDICTION] + [m for m in MAIN_MODELS if m in set(pooled["model"])]
+    rows = []
+    for model in order:
+        match = pooled[pooled["model"] == model]
+        if match.empty:
+            continue
+        row = match.iloc[0]
+        rows.append({column: row.get(column) for column in COMPARISON_COLUMNS})
+    return pd.DataFrame(rows, columns=COMPARISON_COLUMNS)
+
 
 def _fmt(value):
     if pd.isna(value):
@@ -47,14 +74,23 @@ def _fmt(value):
     return str(value)
 
 
-def markdown_table(frame: pd.DataFrame) -> str:
+def markdown_table(frame: pd.DataFrame, formats: dict[str, str] | None = None) -> str:
+    formats = formats or {}
     headers = list(frame.columns)
+
+    def cell(column, value):
+        if pd.isna(value):
+            return "—"
+        if column in formats:
+            return format(float(value), formats[column])
+        return _fmt(value)
+
     lines = [
         "| " + " | ".join(headers) + " |",
         "|" + "|".join(["---"] * len(headers)) + "|",
     ]
     for _, row in frame.iterrows():
-        lines.append("| " + " | ".join(_fmt(row[c]) for c in headers) + " |")
+        lines.append("| " + " | ".join(cell(c, row[c]) for c in headers) + " |")
     return "\n".join(lines)
 
 
@@ -150,6 +186,18 @@ def _reading_notes(summary: pd.DataFrame, buy_hold: pd.DataFrame) -> list[str]:
             "sacrificed."
         )
 
+    if "rmse_skill" in pooled.columns:
+        skill = pooled["rmse_skill"].dropna()
+        if not skill.empty:
+            skill_text = ", ".join(
+                f"{model} {pooled.loc[model, 'rmse_skill']:+.2%}"
+                for model in skill.index
+            )
+            notes.append(
+                f"RMSE skill vs no prediction: {skill_text}. A non-positive value "
+                "means the model does not beat assuming no price change."
+            )
+
     notes.append(
         "The 2026 holdout is a single period reported separately; it is not used "
         "for model selection and should not be treated as a second validation set."
@@ -159,10 +207,13 @@ def _reading_notes(summary: pd.DataFrame, buy_hold: pd.DataFrame) -> list[str]:
 
 def main() -> None:
     summary = pd.read_csv(RESULTS_DIR / "summary.csv")
-    main_summary = summary[summary["model"].isin(["denfis_frozen", "xgboost", "lstm"])]
-    extensions = summary[~summary["model"].isin(["denfis_frozen", "xgboost", "lstm"])]
+    main_summary = summary[summary["model"].isin(MAIN_MODELS)]
+    extensions = summary[
+        ~summary["model"].isin(MAIN_MODELS + [NO_PREDICTION])
+    ]
     pooled = main_summary[main_summary["scope"] == "pooled"][COLUMNS].reset_index(drop=True)
     holdout = main_summary[main_summary["scope"] == "holdout"][COLUMNS].reset_index(drop=True)
+    comparison = _comparison_rows(summary)
 
     bh = pd.DataFrame(_buy_and_hold_rows())
     trading_rows = []
@@ -190,6 +241,22 @@ def main() -> None:
         "## Pooled, 2017–2025",
         "",
         markdown_table(pooled),
+        "",
+        "## Forecast accuracy vs no prediction (pooled, 2017–2025)",
+        "",
+        "No prediction is the zero-return forecast (`y_pred = 0`): tomorrow's adjusted close equals today's. Positive skill means the model beats that random-walk forecast; negative means it is worse.",
+        "",
+        markdown_table(
+            comparison,
+            formats={
+                "rmse": ".6f",
+                "rmse_zero": ".6f",
+                "mae": ".6f",
+                "mae_zero": ".6f",
+                "rmse_skill": "+.2%",
+                "mae_skill": "+.2%",
+            },
+        ),
         "",
         "## Extension: test-time online adaptation (reported separately)",
         "",

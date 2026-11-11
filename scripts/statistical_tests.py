@@ -81,6 +81,8 @@ def pooled_row(model: str, frame: pd.DataFrame) -> dict:
         "n": metrics["n"],
         "rmse": metrics["rmse"],
         "mae": metrics["mae"],
+        "rmse_zero": metrics["rmse_zero"],
+        "rmse_skill": metrics["rmse_skill"],
         "r2": metrics["r2"],
         "ic": metrics["ic"],
         "da": metrics["da"],
@@ -90,26 +92,45 @@ def pooled_row(model: str, frame: pd.DataFrame) -> dict:
 
 
 def comparison_pairs(models: list[str], pooled: dict[str, dict]) -> list[tuple[str, str]]:
-    """Primary DM comparisons: DENFIS vs the best baseline, plus frozen vs online."""
-    denfis = sorted(m for m in models if m.startswith("denfis"))
+    """DM comparisons against no prediction, the best baseline, and each other.
+
+    Every predictive model is compared with ``no_prediction`` first.  DENFIS is
+    then compared with the best *predictive* baseline (no prediction excluded,
+    because it is not a model), and the frozen and online variants against each
+    other.
+    """
+    no_prediction = "no_prediction"
+    predictive = [model for model in models if model != no_prediction]
+    denfis = sorted(m for m in predictive if m.startswith("denfis"))
     baselines = sorted(
-        (m for m in models if not m.startswith("denfis")),
+        (m for m in predictive if not m.startswith("denfis")),
         key=lambda m: pooled[m]["rmse"],
     )
 
     pairs: list[tuple[str, str]] = []
+    if no_prediction in models:
+        pairs.extend((model, no_prediction) for model in denfis + baselines)
     if denfis and baselines:
         reference = baselines[0]
         pairs.extend((model, reference) for model in denfis)
-        if {"denfis_frozen", "denfis_online"} <= set(denfis):
-            pairs.append(("denfis_online", "denfis_frozen"))
-    elif len(baselines) >= 2:
+    if {"denfis_frozen", "denfis_online"} <= set(denfis):
+        pairs.append(("denfis_online", "denfis_frozen"))
+    if not pairs and len(baselines) >= 2:
         # Placeholder until DENFIS lands: best baseline vs runner-up.
         pairs.append((baselines[0], baselines[1]))
-    return pairs
+
+    seen: set[tuple[str, str]] = set()
+    unique: list[tuple[str, str]] = []
+    for pair in pairs:
+        if pair not in seen:
+            seen.add(pair)
+            unique.append(pair)
+    return unique
 
 
-def _fmt(value) -> str:
+def _fmt(value, column: str = "") -> str:
+    if column.endswith("_skill") and isinstance(value, (float, np.floating)):
+        return f"{float(value):+.2%}"
     if isinstance(value, (float, np.floating)):
         return f"{float(value):.4f}"
     return str(value)
@@ -121,7 +142,7 @@ def markdown_table(rows: list[dict], columns: list[str]) -> str:
         "|" + "|".join(["---"] * len(columns)) + "|",
     ]
     for row in rows:
-        lines.append("| " + " | ".join(_fmt(row[c]) for c in columns) + " |")
+        lines.append("| " + " | ".join(_fmt(row[c], c) for c in columns) + " |")
     return "\n".join(lines)
 
 
@@ -187,6 +208,8 @@ def main() -> None:
             "model": model,
             "n": pooled[model]["n"],
             "rmse": pooled[model]["rmse"],
+            "rmse_zero": pooled[model]["rmse_zero"],
+            "rmse_skill": pooled[model]["rmse_skill"],
             "mae": pooled[model]["mae"],
             "r2": pooled[model]["r2"],
             "ic": pooled[model]["ic"],
@@ -215,11 +238,26 @@ def main() -> None:
         "",
         markdown_table(
             pooled_rows,
-            ["model", "n", "rmse", "mae", "r2", "ic", "da", "sharpe", "sharpe_95ci"],
+            [
+                "model",
+                "n",
+                "rmse",
+                "rmse_zero",
+                "rmse_skill",
+                "mae",
+                "r2",
+                "ic",
+                "da",
+                "sharpe",
+                "sharpe_95ci",
+            ],
         ),
         "",
         f"Sharpe CI: stationary block bootstrap, average block {args.block} days, "
-        f"{args.n_boot} resamples, seed {args.seed} (protocol section 6.5).",
+        f"{args.n_boot} resamples, seed {args.seed} (protocol section 6.5). "
+        "The `no_prediction` row is the zero-return forecast; its trading column is "
+        "flat (cash), not buy-and-hold. Use the buy-and-hold figures in the results "
+        "table for the trading comparison.",
         "",
         "## Diebold–Mariano test (squared-error loss, Newey–West)",
         "",
@@ -273,7 +311,12 @@ def main() -> None:
     print(f"Wrote {docs_path}")
     print(f"Wrote {json_path}")
     print()
-    print(markdown_table(pooled_rows, ["model", "rmse", "da", "sharpe", "sharpe_95ci"]))
+    print(
+        markdown_table(
+            pooled_rows,
+            ["model", "rmse", "rmse_zero", "rmse_skill", "da", "sharpe", "sharpe_95ci"],
+        )
+    )
     if dm_table_rows:
         print()
         print(

@@ -17,6 +17,41 @@ from xgboost import XGBRegressor
 from config import GLOBAL_SEED
 
 
+class NaiveZeroModel:
+    """The no-prediction baseline: forecast no change.
+
+    The target is a log return, so ``y_pred = 0`` means "tomorrow's adjusted
+    close equals today's".  This is the random-walk forecast the instructor
+    asked every model to be compared against; it is fitted-free and
+    deterministic, so it is a valid member of the CV runner's model registry.
+    """
+
+    name = "no_prediction"
+
+    def __init__(self, params: Optional[dict] = None, seed: int = GLOBAL_SEED):
+        self.params = dict(params or {})
+        self.seed = seed
+        self.n_features_in_: Optional[int] = None
+
+    def fit(self, X: np.ndarray, y: np.ndarray) -> None:
+        X = np.asarray(X)
+        if X.ndim not in (2, 3):
+            raise ValueError(f"expected a 2-D or 3-D input, got {X.shape}")
+        if len(X) != len(y):
+            raise ValueError(f"X/y length mismatch: {len(X)} vs {len(y)}")
+        self.n_features_in_ = int(X.shape[-1])
+
+    def predict(self, X: np.ndarray) -> np.ndarray:
+        X = np.asarray(X)
+        if X.ndim not in (2, 3):
+            raise ValueError(f"expected a 2-D or 3-D input, got {X.shape}")
+        return np.zeros(len(X), dtype=np.float64)
+
+    def partial_fit(self, x: np.ndarray, y: float) -> None:
+        """The forecast never changes, so online updates are no-ops."""
+        return None
+
+
 class XGBModel:
     """XGBoost regressor with the protocol's fixed search space."""
 

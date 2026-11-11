@@ -8,6 +8,17 @@
 | lstm | 2258 | 0.0120 | 0.0085 | -0.0156 | 0.0061 | 0.4845 | 0.4949 | 0.4066 | 0.0385 | 0.2752 | 0.1382 | 0.3074 |
 | xgboost | 2258 | 0.0120 | 0.0085 | -0.0098 | -0.0094 | 0.5084 | 0.5191 | 0.2376 | 0.0237 | 0.3219 | 0.1926 | 0.5359 |
 
+## Forecast accuracy vs no prediction (pooled, 2017–2025)
+
+No prediction is the zero-return forecast (`y_pred = 0`): tomorrow's adjusted close equals today's. Positive skill means the model beats that random-walk forecast; negative means it is worse.
+
+| model | n | rmse | rmse_zero | rmse_skill | mae | mae_zero | mae_skill |
+|---|---|---|---|---|---|---|---|
+| no_prediction | 2258 | 0.011975 | 0.011975 | +0.00% | 0.008430 | 0.008430 | +0.00% |
+| denfis_frozen | 2258 | 0.012066 | 0.011975 | -0.76% | 0.008564 | 0.008430 | -1.58% |
+| xgboost | 2258 | 0.012009 | 0.011975 | -0.28% | 0.008487 | 0.008430 | -0.66% |
+| lstm | 2258 | 0.012043 | 0.011975 | -0.57% | 0.008526 | 0.008430 | -1.13% |
+
 ## Extension: test-time online adaptation (reported separately)
 
 Predict first, update only after the label is realised. These models are not ranked in the frozen main comparison.
@@ -50,4 +61,5 @@ Baseline holdout artifacts predate the method-line handoff. DENFIS holdout remai
 - Pooled Sharpe ranking: denfis_frozen 0.65 (exposure 34%), lstm 0.41 (exposure 31%), xgboost 0.24 (exposure 54%).
 - Directional accuracy: denfis_frozen 0.501, lstm 0.484, xgboost 0.508 (0.5 is a coin flip).
 - Pooled maximum drawdown: denfis_frozen 20.3%, lstm 27.5%, xgboost 32.2%, versus 38.6% for buy & hold. Lower drawdown only counts as an improvement if the Sharpe is not sacrificed.
+- RMSE skill vs no prediction: denfis_frozen -0.76%, lstm -0.57%, xgboost -0.28%. A non-positive value means the model does not beat assuming no price change.
 - The 2026 holdout is a single period reported separately; it is not used for model selection and should not be treated as a second validation set.

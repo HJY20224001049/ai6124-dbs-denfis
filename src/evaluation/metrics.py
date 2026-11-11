@@ -61,9 +61,62 @@ def directional_accuracy(y_true, y_pred, deadband: float = 0.0) -> float:
     return float(np.mean(np.sign(yt) == np.sign(yp)))
 
 
+def zero_baseline_metrics(y_true) -> dict[str, float]:
+    """Metrics of the no-prediction forecast ``y_pred = 0``.
+
+    In return space this is the random-walk forecast: the price is assumed to
+    stay at its last observed value.  Its RMSE is ``sqrt(mean(y**2))`` and its
+    MAE is ``mean(|y|)``; every model's skill is measured against these.
+    """
+    yt = np.asarray(y_true, dtype=np.float64).ravel()
+    yt = yt[np.isfinite(yt)]
+    if yt.size == 0:
+        raise ValueError("no finite targets")
+    return {
+        "rmse_zero": float(np.sqrt(np.mean(yt**2))),
+        "mae_zero": float(np.mean(np.abs(yt))),
+    }
+
+
+def rmse_skill(y_true, y_pred) -> float:
+    """Relative RMSE improvement over the no-prediction forecast.
+
+    ``skill = 1 - RMSE(model) / RMSE(zeros)``.  Positive means the model
+    beats "predict no change"; negative means it is worse.
+    """
+    yt, yp = _pair(y_true, y_pred)
+    baseline = float(np.sqrt(np.mean(yt**2)))
+    if baseline == 0.0:
+        return float("nan")
+    return float(1.0 - np.sqrt(np.mean((yt - yp) ** 2)) / baseline)
+
+
+def mae_skill(y_true, y_pred) -> float:
+    """Relative MAE improvement over the no-prediction forecast."""
+    yt, yp = _pair(y_true, y_pred)
+    baseline = float(np.mean(np.abs(yt)))
+    if baseline == 0.0:
+        return float("nan")
+    return float(1.0 - np.mean(np.abs(yt - yp)) / baseline)
+
+
+def r2_zero(y_true, y_pred) -> float:
+    """Coefficient of determination against the no-prediction forecast.
+
+    ``1 - SSE(model) / SSE(zeros)``; zero means the model ties the random
+    walk, negative means it is worse.
+    """
+    yt, yp = _pair(y_true, y_pred)
+    sse_zero = float(np.sum(yt**2))
+    if sse_zero == 0.0:
+        return float("nan")
+    return float(1.0 - np.sum((yt - yp) ** 2) / sse_zero)
+
+
 def compute_metrics(y_true, y_pred) -> dict[str, float]:
     yt, yp = _pair(y_true, y_pred)
-    return {
+    baseline = zero_baseline_metrics(yt)
+    metrics = {
         "n": int(yt.size),
         "rmse": rmse(yt, yp),
         "mae": mae(yt, yp),
@@ -71,4 +124,10 @@ def compute_metrics(y_true, y_pred) -> dict[str, float]:
         "ic": information_coefficient(yt, yp),
         "da": directional_accuracy(yt, yp),
         "da5": directional_accuracy(yt, yp, deadband=DEADBAND),
+        "rmse_zero": baseline["rmse_zero"],
+        "mae_zero": baseline["mae_zero"],
+        "rmse_skill": rmse_skill(yt, yp),
+        "mae_skill": mae_skill(yt, yp),
+        "r2_zero": r2_zero(yt, yp),
     }
+    return metrics

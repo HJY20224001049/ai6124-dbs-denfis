@@ -64,7 +64,14 @@ def _baseline_factory(name):
     return factory
 
 
+def _zero_factory(params, seed):
+    from src.models.baselines import NaiveZeroModel
+
+    return NaiveZeroModel(params, seed)
+
+
 MODELS = {
+    "no_prediction": (_zero_factory, [{}], False, None),
     "xgboost": (_baseline_factory("xgboost"), XGB_GRID, False, None),
     "lstm": (_baseline_factory("lstm"), LSTM_CONFIGS, False, 20),
     "denfis_frozen": (_denfis_factory(), DENFIS_GRID, False, None),

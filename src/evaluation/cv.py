@@ -60,6 +60,11 @@ SUMMARY_COLUMNS = [
     "n",
     "rmse",
     "mae",
+    "rmse_zero",
+    "mae_zero",
+    "rmse_skill",
+    "mae_skill",
+    "r2_zero",
     "r2",
     "ic",
     "da",
@@ -366,6 +371,20 @@ def build_summary() -> pd.DataFrame:
         data = json.loads(path.read_text(encoding="utf-8"))
         fold_id = str(data["fold_id"])
         scope = "holdout" if fold_id == "holdout" else "fold"
+        # Metrics JSONs written before the no-prediction baseline was added
+        # lack the five relative fields.  Recompute them from the persisted
+        # predictions so summary.csv is complete without rerunning a model.
+        baseline_keys = ("rmse_zero", "mae_zero", "rmse_skill", "mae_skill", "r2_zero")
+        baseline = {key: data.get(key) for key in baseline_keys}
+        if any(baseline[key] is None for key in baseline_keys):
+            pred_path = PREDS_DIR / model / f"{fold_id}.csv"
+            if pred_path.exists():
+                preds = pd.read_csv(pred_path)
+                computed = compute_metrics(preds["y_true"], preds["y_pred"])
+                for key in baseline_keys:
+                    if baseline[key] is None:
+                        baseline[key] = computed[key]
+
         row = {
             "model": model,
             "scope": scope,
@@ -374,6 +393,7 @@ def build_summary() -> pd.DataFrame:
             "n": data.get("n"),
             "rmse": data.get("rmse"),
             "mae": data.get("mae"),
+            **baseline,
             "r2": data.get("r2"),
             "ic": data.get("ic"),
             "da": data.get("da"),
@@ -424,6 +444,11 @@ def build_summary() -> pd.DataFrame:
                 "n": pooled_metrics["n"],
                 "rmse": pooled_metrics["rmse"],
                 "mae": pooled_metrics["mae"],
+                "rmse_zero": pooled_metrics["rmse_zero"],
+                "mae_zero": pooled_metrics["mae_zero"],
+                "rmse_skill": pooled_metrics["rmse_skill"],
+                "mae_skill": pooled_metrics["mae_skill"],
+                "r2_zero": pooled_metrics["r2_zero"],
                 "r2": pooled_metrics["r2"],
                 "ic": pooled_metrics["ic"],
                 "da": pooled_metrics["da"],

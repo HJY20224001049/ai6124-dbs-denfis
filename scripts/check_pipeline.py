@@ -50,7 +50,11 @@ def main() -> None:
     naive = pd.DataFrame(rows).set_index("fold_id")
     print()
     print("Naive zero-prediction baseline")
-    print(naive[["n", "rmse", "da", "r2"]].to_string())
+    print(naive[["n", "rmse", "rmse_zero", "mae", "mae_zero"]].to_string())
+    print(
+        "Directional accuracy is undefined for a zero forecast: sign(0) = 0, "
+        "so it only counts exactly-zero returns."
+    )
 
     docs = ROOT / "docs"
     docs.mkdir(exist_ok=True)

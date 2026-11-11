@@ -1,0 +1,37 @@
+{
+  "n": 252,
+  "rmse": 0.010817555870421179,
+  "mae": 0.007509521322384829,
+  "r2": -0.02466085469035484,
+  "ic": 0.0,
+  "da": 0.015873015873015872,
+  "da5": 0.0,
+  "rmse_zero": 0.010817555870421179,
+  "mae_zero": 0.007509521322384829,
+  "rmse_skill": 0.0,
+  "mae_skill": 0.0,
+  "r2_zero": 0.0,
+  "sharpe": 0.0,
+  "ann_ret": 0.0,
+  "max_dd": -0.0,
+  "turnover": 0.0,
+  "exposure": 0.0,
+  "cum_return": 0.0,
+  "model": "no_prediction",
+  "fold_id": "r3f2",
+  "rep": 3,
+  "fold": 2,
+  "test_year": 2024,
+  "tau": 0.0,
+  "seed": 243,
+  "params": {},
+  "validation_rmse": 0.00907519535201295,
+  "search_results": [
+    {
+      "params": {},
+      "val_rmse": 0.00907519535201295,
+      "n_rules": null
+    }
+  ],
+  "elapsed_seconds": 0.010710000000000441
+}

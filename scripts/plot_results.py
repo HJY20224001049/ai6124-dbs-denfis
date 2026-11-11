@@ -36,7 +36,13 @@ plt.rcParams.update(
     }
 )
 
-COLORS = {"xgboost": "#94510F", "lstm": "#0E6B5A", "denfis_frozen": "#1F4E79", "denfis_online": "#7A3E8C"}
+COLORS = {
+    "no_prediction": "#6B7280",
+    "xgboost": "#94510F",
+    "lstm": "#0E6B5A",
+    "denfis_frozen": "#1F4E79",
+    "denfis_online": "#7A3E8C",
+}
 
 
 def _models() -> list[str]:
@@ -117,6 +123,47 @@ def plot_directional_accuracy(models: list[str], suffix: str = "baseline") -> Pa
     return path
 
 
+def plot_rmse_skill(models: list[str], suffix: str = "baseline") -> Path:
+    """Per-fold RMSE skill against the no-prediction forecast."""
+    from src.evaluation.metrics import compute_metrics
+
+    folds = [f"r{rep}f{fold}" for rep in (1, 2, 3) for fold in (1, 2, 3)]
+    values = {}
+    for model in models:
+        row = []
+        for fold in folds:
+            path = PREDS_DIR / model / f"{fold}.csv"
+            if not path.exists():
+                row.append(np.nan)
+                continue
+            data = pd.read_csv(path)
+            row.append(compute_metrics(data["y_true"], data["y_pred"])["rmse_skill"])
+        values[model] = row
+
+    x = np.arange(len(folds))
+    width = 0.8 / max(len(values), 1)
+    fig, ax = plt.subplots(figsize=(9, 3.6))
+    for offset, (model, row) in enumerate(values.items()):
+        ax.bar(
+            x - 0.4 + width / 2 + offset * width,
+            row,
+            width,
+            label=model,
+            color=COLORS.get(model, None),
+        )
+    ax.axhline(0.0, color="#16211E", linewidth=0.8, linestyle=":")
+    ax.set_xticks(x)
+    ax.set_xticklabels(folds)
+    ax.set_ylabel("RMSE skill vs no prediction")
+    ax.set_title("Does the model beat the no-prediction forecast?")
+    ax.legend(frameon=False, ncol=2)
+    path = FIGURES_DIR / f"{suffix}_rmse_skill.png"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(path, bbox_inches="tight")
+    plt.close(fig)
+    return path
+
+
 def main() -> None:
     models = _models()
     if not models:
@@ -125,6 +172,11 @@ def main() -> None:
     main_models = [m for m in models if m in ("denfis_frozen", "xgboost", "lstm")]
     print(plot_equity(main_models))
     print(plot_directional_accuracy(main_models))
+    skill_models = [
+        m for m in ("no_prediction", "denfis_frozen", "xgboost", "lstm") if m in models
+    ]
+    if skill_models:
+        print(plot_rmse_skill(skill_models))
     if "denfis_online" in models:
         variants = [m for m in ("denfis_frozen", "denfis_online") if m in models]
         print(plot_equity(variants, "denfis_online", online=True))

@@ -9,8 +9,12 @@ from src.evaluation.metrics import (
     directional_accuracy,
     information_coefficient,
     mae,
+    mae_skill,
     r2,
+    r2_zero,
     rmse,
+    rmse_skill,
+    zero_baseline_metrics,
 )
 
 Y_TRUE = np.array([0.01, -0.02, 0.03, -0.04])
@@ -40,8 +44,44 @@ def test_information_coefficient():
 
 def test_compute_metrics_keys():
     metrics = compute_metrics(Y_TRUE, Y_PRED)
-    assert set(metrics) == {"n", "rmse", "mae", "r2", "ic", "da", "da5"}
+    assert set(metrics) == {
+        "n",
+        "rmse",
+        "mae",
+        "r2",
+        "ic",
+        "da",
+        "da5",
+        "rmse_zero",
+        "mae_zero",
+        "rmse_skill",
+        "mae_skill",
+        "r2_zero",
+    }
     assert metrics["n"] == 4
+
+
+def test_no_prediction_baseline_is_the_zero_forecast():
+    baseline = zero_baseline_metrics(Y_TRUE)
+    assert np.isclose(baseline["rmse_zero"], np.sqrt(np.mean(Y_TRUE**2)))
+    assert np.isclose(baseline["mae_zero"], np.mean(np.abs(Y_TRUE)))
+
+    zeros = np.zeros_like(Y_TRUE)
+    assert np.isclose(rmse_skill(Y_TRUE, zeros), 0.0)
+    assert np.isclose(mae_skill(Y_TRUE, zeros), 0.0)
+    assert np.isclose(r2_zero(Y_TRUE, zeros), 0.0)
+
+    # A perfect forecast improves on the zero forecast by 100%.
+    assert np.isclose(rmse_skill(Y_TRUE, Y_TRUE), 1.0)
+    assert np.isclose(mae_skill(Y_TRUE, Y_TRUE), 1.0)
+    assert np.isclose(r2_zero(Y_TRUE, Y_TRUE), 1.0)
+
+
+def test_negative_skill_when_worse_than_no_prediction():
+    worse = np.full_like(Y_TRUE, 10.0)
+    assert rmse_skill(Y_TRUE, worse) < 0.0
+    assert mae_skill(Y_TRUE, worse) < 0.0
+    assert r2_zero(Y_TRUE, worse) < 0.0
 
 
 def test_constant_prediction_has_zero_ic():
