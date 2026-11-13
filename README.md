@@ -30,18 +30,22 @@ Internal workplans and the course proposal are kept out of this repository.
 - [ ] Joint review, consultation decisions, scheduled freeze and final holdout
 - [ ] Final notebook and slides (due 2026-11-18 23:59)
 
-Current pooled result (2017–2025, 10 bp one-way cost):
+Current pooled result — full protocol models, 13 causal features (2017–2025, 10 bp one-way cost):
 
-| model | RMSE | direction acc. | Sharpe | max drawdown | exposure |
-|---|---|---|---|---|---|
-| XGBoost | 0.0120 | 0.508 | 0.238 | 32.2% | 53.6% |
-| LSTM | 0.0120 | 0.485 | 0.407 | 27.5% | 30.7% |
-| DENFIS frozen | 0.0121 | 0.501 | 0.654 | 20.3% | 34.4% |
-| buy & hold | — | — | 1.113 | 38.6% | 100% |
+| model | RMSE | RMSE skill vs zero | direction acc. | Sharpe | max drawdown | exposure |
+|---|---:|---:|---:|---:|---:|---:|
+| no prediction (ŷ = 0) | 0.011975 | 0 | — | — | — | 0% |
+| XGBoost | 0.012009 | −0.28% | 0.508 | 0.238 | 32.2% | 53.6% |
+| LSTM | 0.012043 | −0.57% | 0.485 | 0.407 | 27.5% | 30.7% |
+| DENFIS frozen | 0.012066 | −0.76% | 0.501 | 0.654 | 20.3% | 34.4% |
+| buy & hold | — | — | — | 1.113 | 38.6% | 100% |
 
-All main models have pooled R² below zero and directional accuracy near 50%. They reduce
-drawdown but give up most of the upside versus buy & hold. This is the honest
-comparison to report without overclaiming.
+All three models are **worse than the zero forecast** on RMSE, have pooled R² below
+zero and directional accuracy near 50%. They reduce drawdown but give up most of
+the upside versus buy & hold. This is the honest comparison to report without
+overclaiming, and it is the result the consultation was about. The simplified
+pilot below is a separate configuration that removes the evolving structure and
+does not replace this table.
 
 The online extension is reported separately: pooled RMSE 0.012185 and Sharpe
 0.260, below frozen DENFIS on this run. DM comparisons are not significant;
