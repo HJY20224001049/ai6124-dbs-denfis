@@ -1,0 +1,65 @@
+{
+  "raw": {
+    "checksums_ok": true,
+    "dbs_rows": 4219,
+    "dbs_start": "2010-01-04",
+    "dbs_end": "2026-10-30",
+    "duplicate_dates": 0,
+    "null_cells": 0,
+    "nonpositive_adj_close": 0,
+    "zero_or_negative_volume": 0,
+    "ohlc_violations": 0,
+    "max_calendar_gap_days": 5,
+    "flat_bars": 0,
+    "repeated_closes": 126,
+    "sti_rows": 4210
+  },
+  "adjustment": {
+    "ratio_jumps_over_1pct": 43,
+    "negative_ratio_jumps": 0,
+    "largest_ratio_jump": 0.03727549971014521
+  },
+  "labels": {
+    "feature_rows": 4158,
+    "label_next_day_mismatches": 0,
+    "max_abs_y_error": 0.0
+  },
+  "prefix_invariance": {
+    "2017-01-03": 0.0,
+    "2020-03-09": 0.0,
+    "2024-11-12": 0.0,
+    "2025-04-07": 0.0
+  },
+  "folds": {
+    "folds": 9,
+    "disjoint": true,
+    "test_sizes": [
+      250,
+      251,
+      250,
+      251,
+      253,
+      250,
+      249,
+      252,
+      252
+    ],
+    "test_total": 2258
+  },
+  "trading_days": {
+    "dbs_only_days": 12,
+    "sti_only_days": 3,
+    "dbs_only_sample": [
+      "2010-08-02",
+      "2011-02-21",
+      "2011-05-30",
+      "2011-07-04",
+      "2011-11-24"
+    ],
+    "sti_only": [
+      "2010-12-31",
+      "2012-04-02",
+      "2020-03-18"
+    ]
+  }
+}

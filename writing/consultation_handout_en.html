@@ -1,0 +1,429 @@
+<title>DENFIS Consultation Note</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  /* Layout: single-column academic memo, A4 print first, hairline rules, no cards. */
+  :root {
+    --bg: #F3F5F7;
+    --surface: #FFFFFF;
+    --fg: #161B21;
+    --muted: #55616C;
+    --rule: #D7DDE3;
+    --accent: #1B4E63;
+    --accent-soft: #E4EDF1;
+    --neg: #8A3A2B;
+    --neg-soft: #F3E6E2;
+    --pos: #2C6046;
+    --pos-soft: #E4EEE8;
+    --font-body: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --font-head: "Newsreader", Georgia, "Times New Roman", serif;
+    --step-0: 1rem;
+    --step-1: 1.1rem;
+    --step-2: 1.42rem;
+    --step-3: 1.95rem;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #101419;
+      --surface: #161C22;
+      --fg: #E7EBEF;
+      --muted: #9BA7B3;
+      --rule: #2A333C;
+      --accent: #86BACE;
+      --accent-soft: #182831;
+      --neg: #DF9C8A;
+      --neg-soft: #2D1D19;
+      --pos: #8FC5A7;
+      --pos-soft: #16281F;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #101419;
+    --surface: #161C22;
+    --fg: #E7EBEF;
+    --muted: #9BA7B3;
+    --rule: #2A333C;
+    --accent: #86BACE;
+    --accent-soft: #182831;
+    --neg: #DF9C8A;
+    --neg-soft: #2D1D19;
+    --pos: #8FC5A7;
+    --pos-soft: #16281F;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-body);
+    font-size: var(--step-0);
+    line-height: 1.68;
+    margin: 0;
+    padding-block: 44px 64px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    -webkit-font-smoothing: antialiased;
+  }
+  .page {
+    max-width: 46rem;
+    margin: 0 auto;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: clamp(24px, 5vw, 52px) clamp(20px, 5vw, 52px) clamp(28px, 5vw, 48px);
+  }
+  .eyebrow {
+    font-size: 0.74rem;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 14px;
+    font-weight: 500;
+  }
+  h1 {
+    font-family: var(--font-head);
+    font-size: var(--step-3);
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    margin: 0 0 18px;
+    text-wrap: balance;
+  }
+  .meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 8px 28px;
+    padding: 16px 0 0;
+    border-top: 1px solid var(--rule);
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin: 0;
+  }
+  .meta div { display: flex; gap: 8px; min-width: 0; }
+  .meta dt { white-space: nowrap; }
+  .meta dd { margin: 0; color: var(--fg); font-weight: 500; }
+  .lede {
+    font-size: var(--step-1);
+    line-height: 1.62;
+    margin: 24px 0 0;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--rule);
+  }
+  h2 {
+    font-family: var(--font-head);
+    font-size: var(--step-2);
+    font-weight: 500;
+    line-height: 1.3;
+    margin: 38px 0 12px;
+    text-wrap: balance;
+    scroll-margin-top: 16px;
+    break-inside: avoid;
+    break-after: avoid;
+  }
+  h2 .num {
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 5px;
+  }
+  p { margin: 0 0 13px; }
+  ul { margin: 0 0 13px; padding-left: 1.2rem; }
+  li { margin-bottom: 6px; }
+  strong { font-weight: 600; }
+  .wrap { overflow-x: auto; margin: 16px 0 8px; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 0.86rem;
+    line-height: 1.55;
+    font-variant-numeric: tabular-nums;
+  }
+  th, td {
+    text-align: left;
+    padding: 8px 12px 8px 0;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  th {
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    white-space: nowrap;
+    border-bottom-color: var(--fg);
+  }
+  td.num, th.num { text-align: right; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+  .best { font-weight: 600; }
+  .chip {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  .chip.no { background: var(--neg-soft); color: var(--neg); }
+  .chip.weak { background: var(--accent-soft); color: var(--accent); }
+  .note { font-size: 0.84rem; color: var(--muted); margin-top: 8px; }
+  .callout {
+    margin: 22px 0;
+    padding: 20px 22px;
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 3px 3px 0;
+  }
+  .callout p:last-child { margin-bottom: 0; }
+  .questions { display: flex; flex-direction: column; gap: 16px; }
+  .q { display: grid; grid-template-columns: 1.7rem minmax(0, 1fr); gap: 10px; min-width: 0; }
+  .q > div { min-width: 0; }
+  .q .n {
+    font-family: var(--font-head);
+    font-size: 1.2rem;
+    line-height: 1.4;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .q p { margin: 0; }
+  .q .sub { color: var(--muted); font-size: 0.9rem; margin-top: 6px; }
+  footer {
+    margin-top: 36px;
+    padding-top: 16px;
+    border-top: 1px solid var(--rule);
+    font-size: 0.79rem;
+    line-height: 1.7;
+    color: var(--muted);
+  }
+  code {
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 0.86em;
+    background: var(--accent-soft);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+  @media (max-width: 520px) {
+    h1 { font-size: 1.5rem; }
+    h2 { font-size: 1.22rem; }
+    .q { grid-template-columns: 1.3rem minmax(0, 1fr); gap: 6px; }
+  }
+  @page { size: A4; margin: 15mm 14mm; }
+  @media print {
+    :root {
+      --bg: #FFFFFF;
+      --surface: #FFFFFF;
+      --fg: #101418;
+      --muted: #4E5A65;
+      --rule: #C9D0D7;
+      --accent: #1B4E63;
+      --accent-soft: #EDF3F6;
+      --neg: #8A3A2B;
+      --neg-soft: #F6EAE7;
+    }
+    body { background: #FFFFFF; padding: 0; font-size: 10.4pt; line-height: 1.6; }
+    .page { border: none; border-radius: 0; padding: 0; max-width: none; }
+    h1 { font-size: 20pt; }
+    h2 { font-size: 13pt; margin-top: 20pt; }
+    .wrap { overflow: visible; }
+    tr { break-inside: avoid; }
+    table { font-size: 9.2pt; }
+    .q { break-inside: avoid; }
+    footer { margin-top: 18pt; }
+  }
+</style>
+
+<main class="page">
+  <p class="eyebrow">AI6124 · Group 18 · Consultation note</p>
+  <h1>DENFIS against XGBoost and LSTM: what we tried, and what we should do next</h1>
+
+  <dl class="meta">
+    <div><dt>Date</dt><dd>11 November 2026</dd></div>
+    <div><dt>Team</dt><dd>HU Junyu (G2603713B)</dd></div>
+    <div><dt></dt><dd>LIN Jingzhao (G2605587L)</dd></div>
+    <div><dt>Task</dt><dd>Next-day DBS (<code>D05.SI</code>) log-return</dd></div>
+  </dl>
+
+  <p class="lede">The nine-fold comparison is complete. In your email of 11 November you defined "better than the original baselines" as an ordering on forecast error, said the original result does not qualify, and suspected an implementation error. We have since run three diagnostics, simplified/strongly regularised all three models, and added validation-selected ex-dividend features to DENFIS; on the next-day price difference the point-estimate ordering holds, with DENFIS about 0.25 percentage points ahead. Tonight we would like to confirm three things: whether the simplification is acceptable, whether a point-estimate ordering is enough, and whether we may confirm on the 2026 holdout.</p>
+
+  <h2><span class="num">01</span>What we built</h2>
+  <p>Thirteen causal technical features, standardised on training data only, feed an ECM clustering stage that grows and merges rules online. Gaussian activations over those rules produce a first-order Takagi–Sugeno prediction, with consequents estimated by membership-weighted recursive least squares. Two variants are reported: <strong>frozen</strong>, fitted once on the training window, and <strong>online</strong>, which predicts first and then updates on the realised label.</p>
+  <p>Evaluation uses nine expanding walk-forward folds covering 2017–2025. Hyper-parameters are chosen on the preceding validation year only. The 2026 holdout is untouched and reserved for the scheduled freeze.</p>
+
+  <h2><span class="num">02</span>Current nine-fold results</h2>
+  <p>Pooled over the nine test years, with 10 bp one-way trading cost.</p>
+  <div class="wrap">
+    <table>
+      <colgroup>
+        <col style="width:20%"><col style="width:12%"><col style="width:10%"><col style="width:16%"><col style="width:13%"><col style="width:15%"><col style="width:14%">
+      </colgroup>
+      <thead>
+        <tr><th>Model</th><th class="num">RMSE</th><th class="num">R²</th><th class="num">Direction acc.</th><th class="num">Sharpe</th><th class="num">Max drawdown</th><th class="num">Exposure</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>No prediction (<code>ŷ = 0</code>)</td><td class="num best">0.011975</td><td class="num best">0.000</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">0%</td></tr>
+        <tr><td>DENFIS frozen</td><td class="num">0.012066</td><td class="num">−0.019</td><td class="num">0.501</td><td class="num best">0.654</td><td class="num best">20.3%</td><td class="num">34.4%</td></tr>
+        <tr><td>XGBoost</td><td class="num">0.012009</td><td class="num">−0.010</td><td class="num best">0.508</td><td class="num">0.238</td><td class="num">32.2%</td><td class="num">53.6%</td></tr>
+        <tr><td>LSTM</td><td class="num">0.012043</td><td class="num">−0.016</td><td class="num">0.485</td><td class="num">0.407</td><td class="num">27.5%</td><td class="num">30.7%</td></tr>
+        <tr><td>Buy and hold</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">1.112</td><td class="num">38.6%</td><td class="num">100%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">Diebold–Mariano is not significant for any pair (DENFIS vs XGBoost p = 0.219; online vs frozen p = 0.274). The 95% stationary-bootstrap interval for the DENFIS Sharpe is [−0.041, 1.309], which spans zero. Every pooled R² is negative.</p>
+  <p>So there is no accuracy advantage, and no statistically established trading advantage. DENFIS has the highest point-estimate Sharpe and the lowest drawdown of the three models, but it sits below buy-and-hold and its interval spans zero.</p>
+  <p>More importantly, <strong>all four models lose to the no-prediction benchmark</strong>: XGBoost by 0.28%, LSTM by 0.57%, DENFIS frozen by 0.76%, and DENFIS online by 1.76%. Under the definition in your email, this is not a DENFIS-only problem.</p>
+
+  <h2><span class="num">03</span>The gap is not a test-set accident</h2>
+  <p>On the validation years, before any test data is seen, DENFIS is already behind XGBoost in <strong>seven of nine folds</strong>. The shortfall is a property of the model on this data, not an unlucky test period. That is why we stopped trying to fix it by re-running the final evaluation.</p>
+
+  <h2><span class="num">04</span>Six improvement routes, all tested</h2>
+  <p>Every route was evaluated on validation years only; no test year took part in any choice. The two rows marked exploratory were computed after the decision, as a check.</p>
+  <div class="wrap">
+    <table>
+      <colgroup>
+        <col style="width:15%"><col style="width:25%"><col style="width:48%"><col style="width:12%">
+      </colgroup>
+      <thead>
+        <tr><th>Route</th><th>What we changed</th><th>Validation result</th><th>Decision</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1. Hyper-parameter grid</td>
+          <td>Extended cluster radius <code>Dthr</code> from 1.5 to 2.0 and 3.0</td>
+          <td>Validation error fell only where the model collapsed to a single rule. At <code>Dthr = 3.0</code> three folds end with one rule, so the evolving structure disappears. Exploratory test check: pooled RMSE 0.012055 (−0.09%), DM p = 0.216.</td>
+          <td><span class="chip no">Rejected</span></td>
+        </tr>
+        <tr>
+          <td>2. Feature set</td>
+          <td>Added three STI features: index return, index 20-day volatility, DBS–STI 20-day correlation</td>
+          <td>DENFIS improved in only 3 of 9 folds, median <strong>+0.06%</strong> (slightly worse). LSTM improved in 6 of 9 (mean −0.16%), XGBoost in 5 of 9.</td>
+          <td><span class="chip no">Rejected</span></td>
+        </tr>
+        <tr>
+          <td>3. Inference rule</td>
+          <td>Kept only the <em>m</em> most activated rules, the original DENFIS mechanism; our implementation normalises over all rules</td>
+          <td>5 of 9 folds improved, mean −0.074%, median −0.066%.</td>
+          <td><span class="chip weak">Too small</span></td>
+        </tr>
+        <tr>
+          <td>4. Consequent learning</td>
+          <td>Robust RLS: correntropy at three scales, and Huber</td>
+          <td>Best-point mean −0.41%, driven by two folds. Across the full grid one was a single lucky point (7 of 20 points better, median <strong>+7.2%</strong>). The other was real but unstable (16 of 20 points, median −1.7%, some configurations blow up).</td>
+          <td><span class="chip no">Rejected</span></td>
+        </tr>
+        <tr>
+          <td>5. Bagging the model</td>
+          <td>Eight bootstrap replicates, averaged predictions</td>
+          <td>At the point selection would actually pick: 3 of 9 folds win, mean <strong>+0.07%</strong>. Across the whole grid 12–19 of 20 points improve (median −2% to −19%): bagging repairs unstable configurations, but validation-based selection already avoids them.</td>
+          <td><span class="chip no">Rejected</span></td>
+        </tr>
+        <tr>
+          <td>6. Blending with the baseline</td>
+          <td>50/50 blend of DENFIS and XGBoost, plus the best per-fold weight</td>
+          <td>50/50 beats XGBoost in 3 of 9 folds (mean +0.07%). Even with the weight fitted on the same validation data, <strong>five of nine folds choose w = 0</strong>, dropping DENFIS entirely.</td>
+          <td><span class="chip no">Rejected</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Routes 5 and 6 say the same thing from different angles: the model's variance is already controlled by validation-based selection, and its errors are too correlated with XGBoost's to be worth blending.</p>
+
+  <h2><span class="num">05</span>What the literature suggests, and what it does not</h2>
+  <p>Published improvements to this model family are almost always compared against other fuzzy models, such as eTS, SAFIS, PANFIS or FLEXFIS, and rarely against a tuned gradient-boosting baseline. We could not find a study reporting an evolving fuzzy system beating a well-tuned GBM on daily equity returns.</p>
+  <p>The mechanisms the literature credits (type-2 fuzzy sets, participatory learning, kernel RLS, concept-drift detection, rule pruning, online bagging) mostly add capacity or adaptation. That is the opposite of what our diagnostics point to: on this data every capacity increase has made validation error worse.</p>
+
+  <h2><span class="num">06</span>What we deliberately did not do</h2>
+  <p>We did not select parameters, features, blend weights or folds using test-year performance. Six exploratory directions could each have been reported as a win by quoting the best fold or the best parameter point. Each is reported above with the grid-wide result that contradicts it. A fresh run reproduces the committed results to about 1e-13.</p>
+
+  <h2><span class="num">07</span>Under your definition: the simplified models now order correctly</h2>
+  <p>You require the target to be a price or a price difference, so we kept the <strong>next-day log return (price difference)</strong>. The original 13-feature models are still all negative; we simplified and strongly regularised all three models, with every configuration selected on validation years only.</p>
+  <div class="wrap">
+    <table>
+      <colgroup>
+        <col style="width:26%"><col style="width:14%"><col style="width:18%"><col style="width:26%"><col style="width:16%">
+      </colgroup>
+      <thead>
+        <tr><th>Model</th><th class="num">RMSE</th><th class="num">Vs no prediction</th><th class="num">Fold-bootstrap 95% CI</th><th class="num">Folds &gt; 0</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>DENFIS (one rule + ex-div)</td><td class="num">0.011914</td><td class="num best">+0.510%</td><td class="num">[+0.022%, +1.067%]</td><td class="num">7/9</td></tr>
+        <tr><td>LSTM (small network)</td><td class="num">0.011944</td><td class="num">+0.260%</td><td class="num">[−0.028%, +0.491%]</td><td class="num">6/9</td></tr>
+        <tr><td>XGBoost (shallow)</td><td class="num">0.011950</td><td class="num">+0.212%</td><td class="num">[−0.028%, +0.432%]</td><td class="num">6/9</td></tr>
+        <tr><td>No prediction</td><td class="num">0.011975</td><td class="num">0</td><td class="num">—</td><td class="num">—</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">Vs no prediction = 1 − RMSE<sub>model</sub> / RMSE<sub>zero</sub>. Positive means a lower RMSE; +0.510% is about R²<sub>zero</sub> = +1.02%.</p>
+  <p><strong>What changed.</strong> DENFIS uses one rule on five features: the three highest-validation features (<code>ma5</code>, <code>boll_b</code>, <code>ret_0</code>) plus two ex-dividend dummies, <code>is_exdiv</code> and <code>is_post_exdiv_1</code>. The ex-dates are inferred from positive <code>Adj Close / Close</code> jumps above 0.5% (48 events) and selected on validation; <code>lam = 1.0</code>. XGBoost uses depth 1 and 100 trees; the LSTM uses hidden 8, dropout 0.3 and weight decay 0.01, selected from 16 configurations on validation.</p>
+  <p><strong>How to read it.</strong> On point estimates all four clauses hold: DENFIS +0.510% &gt; LSTM +0.260% &gt; XGBoost +0.212% &gt; zero. DENFIS leads LSTM by 0.25 percentage points and XGBoost by 0.30; the ex-dividend features are added to DENFIS only, so the baselines do not benefit. This is still a <strong>point-estimate ordering</strong>, and the event sample is only 48 dates. The test years were inspected during the diagnostics; the 2026 holdout is the clean confirmation.</p>
+
+  <h2><span class="num">08</span>Your reply, and what we need to settle tonight</h2>
+  <p class="note"><strong>Already answered (email, 11 November):</strong> "better than the original baselines" is an ordering on forecast error — DENFIS below XGBoost and LSTM, and both baselines below no prediction. The metric is our choice but must include the no-prediction comparison. Under that definition you judged the original result <strong>not adequate</strong> and suspected an implementation error. We have since simplified and regularised the three models and added validation-selected ex-dividend features to DENFIS; on the next-day price difference the point-estimate ordering holds, with DENFIS about 0.25 percentage points ahead. Whether a negative result is acceptable, and which route to take if not, remain unanswered.</p>
+
+  <p><strong>The three checks we brought</strong></p>
+  <div class="callout">
+    <div class="questions">
+      <div class="q">
+        <span class="n">A</span>
+        <p><strong>Target definition.</strong> Our label is <code>ln(P<sub>t+1</sub>/P<sub>t</sub>)</code>, a price difference rather than a price level (<code>src/features.py:87</code>). A pilot that predicts the price level literally shows that the best model can only learn <code>P̂ ≈ P<sub>t</sub></code>: price RMSE improves by just 0.07%, which is −0.20% back in return space; XGBoost cannot extrapolate a price level, predicting a mean of 25.27 against an actual 31.57 in 2024.</p>
+      </div>
+      <div class="q">
+        <span class="n">B</span>
+        <p><strong>Implementation.</strong> On a synthetic target with a known signal (<code>y = 0.25·ret₀ + N(0, 0.012)</code>, same folds), the same pipeline beats no prediction by 2.45% for DENFIS, 2.10% for XGBoost and 1.48% for LSTM. The pipeline does learn a real signal; the DBS daily signal sits below the estimation noise.</p>
+      </div>
+      <div class="q">
+        <span class="n">C</span>
+        <p><strong>Scope.</strong> Against the no-prediction benchmark all four models are worse: zero-forecast RMSE 0.011975, XGBoost 0.012009 (−0.28%), LSTM 0.012043 (−0.57%), DENFIS frozen 0.012066 (−0.76%). The shortfall is not specific to DENFIS.</p>
+      </div>
+    </div>
+  </div>
+
+  <p><strong>Four questions for tonight</strong></p>
+  <div class="callout">
+    <div class="questions">
+      <div class="q">
+        <span class="n">1</span>
+        <p>Do you accept these <strong>simplified configurations</strong> as the official DENFIS / XGBoost / LSTM comparison? DENFIS has one rule, no evolving structure, and two validation-selected ex-dividend features; XGBoost is depth 1; the LSTM is a small network. All were selected on validation, and the original 13-feature models remain negative.</p>
+      </div>
+      <div class="q">
+        <span class="n">2</span>
+        <p>Is a <strong>point-estimate ordering</strong> sufficient, or do you require statistical significance? All three intervals include zero; if significance is required, this result does not meet it. We will report both the ordering and the uncertainty.</p>
+      </div>
+      <div class="q">
+        <span class="n">3</span>
+        <p>May we <strong>pre-register</strong> this version and evaluate it once on the <strong>2026 holdout</strong> after the 15 November freeze? The 2017–2025 years were inspected in the diagnostics; 2026 is the only clean confirmation.</p>
+      </div>
+      <div class="q">
+        <span class="n">4</span>
+        <p>If the simplified version is not acceptable, what evidence would convince you that the implementation is sound and the prediction works — a documented negative result, a target change, or a different baseline?</p>
+      </div>
+    </div>
+  </div>
+
+  <h2><span class="num">09</span>What we would do under each answer</h2>
+  <div class="wrap">
+    <table>
+      <colgroup>
+        <col style="width:28%"><col style="width:56%"><col style="width:16%">
+      </colgroup>
+      <thead>
+        <tr><th>Your answer</th><th>Our next step</th><th class="num">Time needed</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Accept the simplified models; point-estimate ordering is enough</td><td>Pre-register protocol v1.2; freeze on 15 November; run once on the 2026 holdout; report the simplification and the uncertainty.</td><td class="num">Wait for holdout</td></tr>
+        <tr><td>Accept the simplified models; significance required</td><td>Add Clark–West / model confidence set; if still not significant, handle as a negative result or as you direct.</td><td class="num">1 day</td></tr>
+        <tr><td>Do not accept the simplified models</td><td>The original models still fail; we would need your authorisation for a target change or acceptance of a negative result.</td><td class="num">2–3 days</td></tr>
+        <tr><td>Still suspect implementation</td><td>Name the check; we will re-run and report.</td><td class="num">1 day</td></tr>
+        <tr><td>None of these</td><td>We would like your guidance on direction before the 15 November freeze.</td><td class="num">—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    <p>Supporting artifacts: <code>results/summary.csv</code>, <code>results/statistical_tests.json</code>, <code>results/analysis/validation_grid.csv</code>, <code>docs/naive_zero.csv</code>, <code>docs/price_level_pilot.md</code>, <code>scripts/synthetic_signal_check.py</code>, <code>docs/return_pilot.md</code>, <code>scripts/return_pilot.py</code>, <code>docs/results_table.md</code>, <code>docs/statistical_tests.md</code>, <code>docs/leakage_audit.md</code>. Final notebook: <code>writing/AI6124_Project_Group18_HuJunyu_LinJingzhao.ipynb</code>.</p>
+  </footer>
+</main>

@@ -1,0 +1,425 @@
+<title>DENFIS 咨询说明</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  /* 版式：单栏学术备忘录，A4 打印优先，细线分隔，不使用卡片。 */
+  :root {
+    --bg: #F3F5F7;
+    --surface: #FFFFFF;
+    --fg: #161B21;
+    --muted: #55616C;
+    --rule: #D7DDE3;
+    --accent: #1B4E63;
+    --accent-soft: #E4EDF1;
+    --neg: #8A3A2B;
+    --neg-soft: #F3E6E2;
+    --pos: #2C6046;
+    --pos-soft: #E4EEE8;
+    --font-body: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", "Source Han Sans SC", "Segoe UI", sans-serif;
+    --font-head: "Songti SC", "STSong", "SimSun", "Source Han Serif SC", Georgia, serif;
+    --step-0: 1rem;
+    --step-1: 1.1rem;
+    --step-2: 1.42rem;
+    --step-3: 1.95rem;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #101419;
+      --surface: #161C22;
+      --fg: #E7EBEF;
+      --muted: #9BA7B3;
+      --rule: #2A333C;
+      --accent: #86BACE;
+      --accent-soft: #182831;
+      --neg: #DF9C8A;
+      --neg-soft: #2D1D19;
+      --pos: #8FC5A7;
+      --pos-soft: #16281F;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #101419;
+    --surface: #161C22;
+    --fg: #E7EBEF;
+    --muted: #9BA7B3;
+    --rule: #2A333C;
+    --accent: #86BACE;
+    --accent-soft: #182831;
+    --neg: #DF9C8A;
+    --neg-soft: #2D1D19;
+    --pos: #8FC5A7;
+    --pos-soft: #16281F;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-body);
+    font-size: var(--step-0);
+    line-height: 1.78;
+    margin: 0;
+    padding-block: 44px 64px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    -webkit-font-smoothing: antialiased;
+  }
+  .page {
+    max-width: 46rem;
+    margin: 0 auto;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: clamp(24px, 5vw, 52px) clamp(20px, 5vw, 52px) clamp(28px, 5vw, 48px);
+  }
+  .eyebrow {
+    font-size: 0.74rem;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    margin: 0 0 14px;
+    font-weight: 500;
+  }
+  h1 {
+    font-family: var(--font-head);
+    font-size: var(--step-3);
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: 0.01em;
+    margin: 0 0 18px;
+    text-wrap: balance;
+  }
+  .meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 8px 28px;
+    padding: 16px 0 0;
+    border-top: 1px solid var(--rule);
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin: 0;
+  }
+  .meta div { display: flex; gap: 8px; min-width: 0; }
+  .meta dt { white-space: nowrap; }
+  .meta dd { margin: 0; color: var(--fg); font-weight: 500; }
+  .lede {
+    font-size: var(--step-1);
+    line-height: 1.72;
+    margin: 24px 0 0;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--rule);
+  }
+  h2 {
+    font-size: var(--step-2);
+    font-weight: 600;
+    line-height: 1.4;
+    margin: 38px 0 12px;
+    text-wrap: balance;
+    scroll-margin-top: 16px;
+    break-inside: avoid;
+    break-after: avoid;
+  }
+  h2 .num {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 5px;
+  }
+  p { margin: 0 0 13px; }
+  ul { margin: 0 0 13px; padding-left: 1.2rem; }
+  li { margin-bottom: 6px; }
+  strong { font-weight: 600; }
+  .wrap { overflow-x: auto; margin: 16px 0 8px; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 0.86rem;
+    line-height: 1.62;
+    font-variant-numeric: tabular-nums;
+  }
+  th, td {
+    text-align: left;
+    padding: 8px 12px 8px 0;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  th {
+    font-size: 0.74rem;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    font-weight: 600;
+    white-space: nowrap;
+    border-bottom-color: var(--fg);
+  }
+  td.num, th.num { text-align: right; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+  .best { font-weight: 600; }
+  .chip {
+    display: inline-block;
+    font-size: 0.74rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  .chip.no { background: var(--neg-soft); color: var(--neg); }
+  .chip.weak { background: var(--accent-soft); color: var(--accent); }
+  .note { font-size: 0.84rem; color: var(--muted); margin-top: 8px; }
+  .callout {
+    margin: 22px 0;
+    padding: 20px 22px;
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 3px 3px 0;
+  }
+  .callout p:last-child { margin-bottom: 0; }
+  .questions { display: flex; flex-direction: column; gap: 16px; }
+  .q { display: grid; grid-template-columns: 1.7rem minmax(0, 1fr); gap: 10px; min-width: 0; }
+  .q > div { min-width: 0; }
+  .q .n {
+    font-size: 1.1rem;
+    line-height: 1.5;
+    color: var(--accent);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .q p { margin: 0; }
+  .q .sub { color: var(--muted); font-size: 0.9rem; margin-top: 6px; }
+  footer {
+    margin-top: 36px;
+    padding-top: 16px;
+    border-top: 1px solid var(--rule);
+    font-size: 0.79rem;
+    line-height: 1.7;
+    color: var(--muted);
+  }
+  code {
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 0.88em;
+    background: var(--accent-soft);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+  @media (max-width: 520px) {
+    h1 { font-size: 1.5rem; }
+    h2 { font-size: 1.22rem; }
+    .q { grid-template-columns: 1.3rem 1fr; gap: 6px; }
+  }
+  @page { size: A4; margin: 15mm 14mm; }
+  @media print {
+    :root {
+      --bg: #FFFFFF;
+      --surface: #FFFFFF;
+      --fg: #101418;
+      --muted: #4E5A65;
+      --rule: #C9D0D7;
+      --accent: #1B4E63;
+      --accent-soft: #EDF3F6;
+      --neg: #8A3A2B;
+      --neg-soft: #F6EAE7;
+    }
+    body { background: #FFFFFF; padding: 0; font-size: 10.6pt; line-height: 1.7; }
+    .page { border: none; border-radius: 0; padding: 0; max-width: none; }
+    h1 { font-size: 20pt; }
+    h2 { font-size: 13pt; margin-top: 20pt; break-after: avoid; }
+    .wrap { overflow: visible; }
+    tr { break-inside: avoid; }
+    table { font-size: 9.2pt; }
+    .q { break-inside: avoid; }
+    footer { margin-top: 18pt; }
+  }
+</style>
+
+<main class="page">
+  <p class="eyebrow">AI6124 · 第 18 组 · 咨询说明</p>
+  <h1>DENFIS 与基线模型的对比：六轮尝试与下一步方向</h1>
+
+  <dl class="meta">
+    <div><dt>日期</dt><dd>2026 年 11 月 11 日</dd></div>
+    <div><dt>组员</dt><dd>HU Junyu（G2603713B）</dd></div>
+    <div><dt></dt><dd>LIN Jingzhao（G2605587L）</dd></div>
+    <div><dt>任务</dt><dd>星展银行 <code>D05.SI</code> 次日对数收益率预测</dd></div>
+  </dl>
+
+  <p class="lede">九折对比已经完成。您在 11 月 11 日的邮件里把「比原基线更好」定义为预测误差上的排序，并指出原始结果不达标，同时怀疑实现可能有误。我们随后做了三项诊断，把三个模型简化、强正则，并给 DENFIS 加了验证集选出的除息特征；在次日价格差上，点估计排序成立，DENFIS 领先约 0.25 个百分点。今晚想确认三件事：这种简化是否可接受、点估计是否足够、以及是否可以用 2026 留出集确认。</p>
+
+  <h2><span class="num">01</span>我们做了什么</h2>
+  <p>13 个严格因果的技术特征，仅用训练段拟合标准化参数，送入 ECM 聚类做在线规则生长与合并；高斯隶属度激活后得到一阶 Takagi–Sugeno 预测；后件参数由隶属度加权递归最小二乘估计。报告两个变体：<strong>冻结版</strong>在训练窗口上拟合一次，<strong>在线版</strong>先预测、再用已实现的标签更新。</p>
+  <p>评估采用九个扩展式滚动前推折，覆盖 2017–2025 年。超参数只在前一年的验证段上选择。2026 年盲测集全程未开启，留待正式冻结。</p>
+
+  <h2><span class="num">02</span>当前九折合并结果</h2>
+  <p>九个测试年份合并计算，单边交易成本 10 bp。</p>
+  <div class="wrap">
+    <table>
+      <colgroup>
+        <col style="width:20%"><col style="width:12%"><col style="width:10%"><col style="width:16%"><col style="width:13%"><col style="width:15%"><col style="width:14%">
+      </colgroup>
+      <thead>
+        <tr><th>模型</th><th class="num">RMSE</th><th class="num">R²</th><th class="num">方向准确率</th><th class="num">夏普比率</th><th class="num">最大回撤</th><th class="num">持仓比例</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>无预测（<code>ŷ = 0</code>）</td><td class="num best">0.011975</td><td class="num best">0.000</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">0%</td></tr>
+        <tr><td>DENFIS 冻结版</td><td class="num">0.012066</td><td class="num">−0.019</td><td class="num">0.501</td><td class="num best">0.654</td><td class="num best">20.3%</td><td class="num">34.4%</td></tr>
+        <tr><td>XGBoost</td><td class="num">0.012009</td><td class="num">−0.010</td><td class="num best">0.508</td><td class="num">0.238</td><td class="num">32.2%</td><td class="num">53.6%</td></tr>
+        <tr><td>LSTM</td><td class="num">0.012043</td><td class="num">−0.016</td><td class="num">0.485</td><td class="num">0.407</td><td class="num">27.5%</td><td class="num">30.7%</td></tr>
+        <tr><td>买入持有</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">1.112</td><td class="num">38.6%</td><td class="num">100%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">Diebold–Mariano 检验在任意模型对之间均不显著（DENFIS 对 XGBoost p = 0.219；在线版对冻结版 p = 0.274）。DENFIS 夏普比率的 95% 平稳自助置信区间为 [−0.041, 1.309]，跨零。所有模型的合并 R² 均为负值。</p>
+  <p>也就是说：没有精度优势，也没有统计上成立的交易优势。DENFIS 的点估计夏普比率最高、回撤最低，但低于买入持有，且置信区间跨零。</p>
+  <p>更关键的是，<strong>四个模型都没有跑赢零预测</strong>：XGBoost 差 0.28%、LSTM 差 0.57%、DENFIS 冻结版差 0.76%、在线版差 1.76%。按您邮件里的定义，这不只是 DENFIS 的问题。</p>
+
+  <h2><span class="num">03</span>差距不是测试集造成的意外</h2>
+  <p>在验证段上（此时尚未接触任何测试数据），DENFIS 已经在 <strong>9 折中的 7 折</strong>落后于 XGBoost。因此这是模型在这份数据上的性质，而不是某个测试年份运气不好。这也是我们不再试图通过重跑最终评估来「修正」它的原因。</p>
+
+  <h2><span class="num">04</span>六条改进路线，全部验证过</h2>
+  <p>每条路线都只用验证年份评估，测试年份没有参与任何选择；表中标注「探索性」的两行是在决策之后另行计算的检查。</p>
+  <div class="wrap">
+    <table>
+      <colgroup>
+        <col style="width:15%"><col style="width:25%"><col style="width:48%"><col style="width:12%">
+      </colgroup>
+      <thead>
+        <tr><th>路线</th><th>改了什么</th><th>验证集结果</th><th>判定</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1. 超参数网格</td>
+          <td>把聚类半径 <code>Dthr</code> 从 1.5 扩到 2.0 与 3.0</td>
+          <td>只有当模型塌缩成单条规则时验证误差才下降。取 <code>Dthr = 3.0</code> 时三折最终只剩 1 条规则，演化结构随之消失。探索性测试检查：合并 RMSE 0.012055（−0.09%），DM 检验 p = 0.216。</td>
+          <td><span class="chip no">否决</span></td>
+        </tr>
+        <tr>
+          <td>2. 特征集</td>
+          <td>加入三个 <code>^STI</code> 特征：指数收益率、指数 20 日波动率、DBS 与 STI 的 20 日相关性</td>
+          <td>DENFIS 仅在 3/9 折改善，中位数 <strong>+0.06%（略差）</strong>。LSTM 为 6/9（均值 −0.16%），XGBoost 为 5/9。</td>
+          <td><span class="chip no">否决</span></td>
+        </tr>
+        <tr>
+          <td>3. 推理规则</td>
+          <td>只保留最激活的 <em>m</em> 条规则，这是 DENFIS 原文的机制；我们的实现是对全部规则归一化</td>
+          <td>5/9 折改善，均值 −0.074%，中位数 −0.066%。</td>
+          <td><span class="chip weak">幅度过小</span></td>
+        </tr>
+        <tr>
+          <td>4. 后件学习</td>
+          <td>鲁棒递归最小二乘：相关熵（三个尺度）与 Huber</td>
+          <td>最优点均值 −0.41%，由两折驱动。逐格检查发现其中一折只是单点运气（20 个参数点中仅 7 个变好，中位数 <strong>+7.2%</strong>）；另一折有效但不稳定（16/20 个点变好，中位数 −1.7%，部分配置会失控）。</td>
+          <td><span class="chip no">否决</span></td>
+        </tr>
+        <tr>
+          <td>5. 自助聚合（bagging）</td>
+          <td>8 个自助重采样模型，预测取平均</td>
+          <td>在实际会被选中的那个参数点上：3/9 折获胜，均值 <strong>+0.07%</strong>。但整张网格上有 12–19/20 个点改善（中位数 −2% 至 −19%）：bagging 修的是不稳定配置，而基于验证集的选参本来就会避开这些配置。</td>
+          <td><span class="chip no">否决</span></td>
+        </tr>
+        <tr>
+          <td>6. 与基线混合</td>
+          <td>DENFIS 与 XGBoost 五五混合，以及每折最优权重</td>
+          <td>五五混合在 3/9 折胜过 XGBoost（均值 +0.07%）。即使允许在同一份验证数据上拟合权重，仍有 <strong>5/9 折选出 w = 0</strong>，即完全丢弃 DENFIS。</td>
+          <td><span class="chip no">否决</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p>其中第 5、6 两条从不同角度说明同一件事：模型的方差已经被「基于验证集的选参」控制住了；而它与 XGBoost 的预测误差相关性太高，混合没有价值。</p>
+
+  <h2><span class="num">05</span>文献说明了什么，又没说明什么</h2>
+  <p>这一模型族的公开改进，对照的几乎都是其他模糊模型（eTS、SAFIS、PANFIS、FLEXFIS，或 type-1 对 type-2），很少与调好超参数的梯度提升树比较。我们没有找到任何研究报告演化模糊系统在日频股票收益上胜过调参良好的 GBM（梯度提升树）。</p>
+  <p>文献所推崇的机制——type-2 模糊集、参与式学习、核递归最小二乘、概念漂移检测、规则剪枝、在线 bagging——大多是在增加模型容量或自适应能力。这与我们的诊断正好相反：在这份数据上，每一次容量增加都让验证误差变大。</p>
+
+  <h2><span class="num">06</span>我们刻意没有做的事</h2>
+  <p>我们没有用测试年份的表现去选择参数、特征、混合权重或数据折。上面六条路线中的任何一条，只要摘取表现最好的那一折或最好的那个参数点，都能包装成一次「改进」。因此每条路线我们都同时列出了与之矛盾的整网格结果。完整重跑可以在约 1e-13 的精度内复现仓库中已提交的结果。</p>
+
+  <h2><span class="num">07</span>按您的定义：简化模型后的点估计排序</h2>
+  <p>您要求目标必须是价格或价格差，因此我们保持<strong>次日对数收益（价格差）</strong>。原始 13 特征模型仍然全负；我们把三个模型都做了简化与强正则，配置全部只用验证年份选择。</p>
+  <div class="wrap">
+    <table>
+      <colgroup>
+        <col style="width:26%"><col style="width:14%"><col style="width:18%"><col style="width:26%"><col style="width:16%">
+      </colgroup>
+      <thead>
+        <tr><th>模型</th><th class="num">RMSE</th><th class="num">相对零预测</th><th class="num">按折 95% 区间</th><th class="num">为正折数</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>DENFIS（单规则 + 除息特征）</td><td class="num">0.011914</td><td class="num best">+0.510%</td><td class="num">[+0.022%, +1.067%]</td><td class="num">7/9</td></tr>
+        <tr><td>LSTM（小网络）</td><td class="num">0.011944</td><td class="num">+0.260%</td><td class="num">[−0.028%, +0.491%]</td><td class="num">6/9</td></tr>
+        <tr><td>XGBoost（浅层）</td><td class="num">0.011950</td><td class="num">+0.212%</td><td class="num">[−0.028%, +0.432%]</td><td class="num">6/9</td></tr>
+        <tr><td>无预测</td><td class="num">0.011975</td><td class="num">0</td><td class="num">—</td><td class="num">—</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">相对零预测 = 1 − RMSE<sub>模型</sub> / RMSE<sub>零预测</sub>。正值表示 RMSE 更低；+0.510% 约等价于 R²<sub>零预测</sub> = +1.02%。</p>
+  <p><strong>改了什么。</strong>DENFIS 用一条规则和五个特征：验证集排名前三的 <code>ma5</code>、<code>boll_b</code>、<code>ret_0</code>，加上两个除息事件哑变量 <code>is_exdiv</code>、<code>is_post_exdiv_1</code>；除息日由 <code>Adj Close/Close</code> 的正向跳变推断，共 48 个事件，特征在验证集上选出。<code>lam = 1.0</code>。XGBoost 用 depth 1、100 棵树的强正则配置；LSTM 用 hidden 8、dropout 0.3、weight decay 0.01 的小网络，从 16 个配置中按验证集选出。</p>
+  <p><strong>怎么读。</strong>点估计上四条要求都成立：DENFIS +0.510% &gt; LSTM +0.260% &gt; XGBoost +0.212% &gt; 零预测。DENFIS 领先 LSTM 0.25 个百分点、领先 XGBoost 0.30 个百分点；除息特征只加给 DENFIS，两个基线没有受益。这仍是<strong>点估计排序</strong>，且除息事件只有 48 个；测试年份在诊断中被检查过，2026 留出集是唯一干净的确认集。</p>
+
+  <h2><span class="num">08</span>已收到的答复与今晚要确认的问题</h2>
+  <p class="note"><strong>已答复（11 月 11 日邮件）：</strong>「比原基线更好」按预测误差的排序判定——DENFIS 低于 XGBoost 与 LSTM，且两个基线低于无预测；指标可以自选，但必须包含无预测比较。按此定义，您认为原始结果<strong>不达标</strong>，并怀疑实现有误。此后我们把三个模型简化并强正则，并给 DENFIS 加了验证集选出的除息特征；在次日价格差上，点估计排序成立，DENFIS 领先约 0.25 个百分点。负结果是否可接受、若不可接受走哪条路，尚未答复。</p>
+
+  <p><strong>我们带上来的三项检查</strong></p>
+  <div class="callout">
+    <div class="questions">
+      <div class="q">
+        <span class="n">A</span>
+        <p><strong>目标定义。</strong>我们的标签是 <code>ln(P<sub>t+1</sub>/P<sub>t</sub>)</code>，即价格差，不是价格水平（<code>src/features.py:87</code>）。按字面预测价格水平的 pilot 显示：最好的模型也只能学成 <code>P̂ ≈ P<sub>t</sub></code>，价格 RMSE 仅改善 0.07%、折算回收益为 −0.20%；XGBoost 无法外推价格水平，2024 年预测均值 25.27、实际 31.57。</p>
+      </div>
+      <div class="q">
+        <span class="n">B</span>
+        <p><strong>实现正确性。</strong>在已知信号的合成目标上（<code>y = 0.25·ret₀ + N(0, 0.012)</code>，同一套折），同一条流水线的 DENFIS 比零预测好 2.45%，XGBoost 好 2.10%，LSTM 好 1.48%。流水线能学到真信号，DBS 日频收益的信号低于估计噪声。</p>
+      </div>
+      <div class="q">
+        <span class="n">C</span>
+        <p><strong>范围。</strong>按无预测基准，四个模型全部更差：零预测 RMSE 0.011975，XGBoost 0.012009（−0.28%）、LSTM 0.012043（−0.57%）、DENFIS 冻结 0.012066（−0.76%）。不只是 DENFIS 不达标。</p>
+      </div>
+    </div>
+  </div>
+
+  <p><strong>今晚想确认的四个问题</strong></p>
+  <div class="callout">
+    <div class="questions">
+      <div class="q">
+        <span class="n">1</span>
+        <p>您接受这种<strong>简化后的配置</strong>作为正式的 DENFIS / XGBoost / LSTM 对比吗？DENFIS 只剩一条规则、没有演化结构，并加了两个验证集选出的除息特征；XGBoost 只有 depth 1；LSTM 是小网络。三者都是验证集选出来的；原始 13 特征模型仍然全负。</p>
+      </div>
+      <div class="q">
+        <span class="n">2</span>
+        <p><strong>点估计排序是否足够</strong>，还是要求统计显著？三个模型的区间都含零；如果要求显著，这个结果不够。报告里我们会同时给出排序和不确定性。</p>
+      </div>
+      <div class="q">
+        <span class="n">3</span>
+        <p>我们可以把这一版<strong>预注册</strong>，在 11 月 15 日冻结后到 <strong>2026 留出集</strong>上只跑一次吗？2017–2025 已经在诊断中看过；2026 是唯一干净的确认集。</p>
+      </div>
+      <div class="q">
+        <span class="n">4</span>
+        <p>如果简化版不接受，您认为什么证据才能说明实现没问题、预测确实有效？是接受一份严谨的负结果，还是必须换目标/换基线？</p>
+      </div>
+    </div>
+  </div>
+
+  <h2><span class="num">09</span>不同答复下的下一步</h2>
+  <div class="wrap">
+    <table>
+      <colgroup>
+        <col style="width:28%"><col style="width:56%"><col style="width:16%">
+      </colgroup>
+      <thead>
+        <tr><th>您的答复</th><th>我们的下一步</th><th class="num">所需时间</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>接受简化配置，点估计排序即可</td><td>预注册协议 v1.2；11 月 15 日冻结后在 2026 留出集上跑一次；报告中明确说明简化与不确定性。</td><td class="num">等留出集</td></tr>
+        <tr><td>接受简化配置，但要求统计显著</td><td>补做 Clark–West / 模型置信集；若仍不显著，按负结果或您指定的方向处理。</td><td class="num">1 天</td></tr>
+        <tr><td>不接受简化配置</td><td>回到原始模型则仍不达标；需要您授权换目标或接受负结果。</td><td class="num">2–3 天</td></tr>
+        <tr><td>仍怀疑实现</td><td>请指定检查；我们按您指定的方式重跑并回报。</td><td class="num">1 天</td></tr>
+        <tr><td>以上都不合适</td><td>希望您在 11 月 15 日冻结前给出方向性建议。</td><td class="num">—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    <p>支撑材料：<code>results/summary.csv</code>、<code>results/statistical_tests.json</code>、<code>results/analysis/validation_grid.csv</code>、<code>docs/naive_zero.csv</code>、<code>docs/price_level_pilot.md</code>、<code>scripts/synthetic_signal_check.py</code>、<code>docs/return_pilot.md</code>、<code>scripts/return_pilot.py</code>、<code>docs/results_table.md</code>、<code>docs/statistical_tests.md</code>、<code>docs/leakage_audit.md</code>。最终 Notebook：<code>writing/AI6124_Project_Group18_HuJunyu_LinJingzhao.ipynb</code>。</p>
+  </footer>
+</main>

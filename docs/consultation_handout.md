@@ -1,33 +1,164 @@
-# AI6124 consultation handout — 11 November 2026
+# AI6124 咨询说明 — 2026 年 11 月 11 日
 
-**Team:** HU Junyu / LIN Jingzhao. **Task:** next-day DBS log-return forecasting.
+**组员：** HU Junyu（G2603713B）／ LIN Jingzhao（G2605587L）
+**任务：** 星展银行（`D05.SI`）次日对数收益率预测
+**模型：** 演化神经模糊系统（ECM → 高斯 TSK 规则 → 递归最小二乘）
+**基线：** XGBoost、LSTM
+**状态：** 九折已完成（2017–2025）；2026 年盲测集留待正式冻结；本说明中没有任何结果
+是在测试年份上调参得到的。
 
-## Architecture and evaluation
+打印版：`writing/consultation_handout.pdf`
 
-13 causal features -> training-only 5/95 winsorisation and z-score -> ECM
-clusters -> Gaussian activations -> first-order TSK rules -> weighted RLS.
+---
 
-For test year Y: selection training through Y-2 -> validation in Y-1 -> final
-refit through Y-1 -> test in Y. Nine tests: 2017–2025. The 2026 holdout is
-reserved for the scheduled final freeze; baseline holdout artifacts already
-existed before method integration and are not used for our model selection.
+## 1. 我们做了什么
 
-## Preliminary evidence (not frozen)
+13 个严格因果的技术特征，仅用训练段做 5/95 缩尾与 z-score 标准化；送入 ECM 聚类
+做在线规则生长与合并；高斯隶属度激活后得到一阶 Takagi–Sugeno 预测；后件参数由
+隶属度加权递归最小二乘估计。报告两个变体：**冻结版**（在训练窗口上拟合一次）与
+**在线版**（先预测、再用已实现的标签更新）。九个扩展式滚动前推折，按标签日期做
+边界清理（purge）；`Dthr × λ` 只在紧邻的验证年份上选择。
 
-Frozen DENFIS has completed all nine folds: pooled RMSE 0.012066, DA 0.5009,
-Sharpe 0.6541, maximum drawdown 20.3%, exposure 34.4%. Historical baseline
-Sharpes: XGBoost 0.2376, LSTM 0.4066, buy-and-hold 1.1125. Thus a larger
-strategy Sharpe than the fitted baselines is not evidence of lower forecast
-error or superiority to buying and holding. Statistical uncertainty is reported
-in docs/statistical_tests.md after both model runs finish.
+## 2. 当前九折合并结果（2017–2025，单边成本 10 bp）
 
-## Decisions requested from instructor
+| 模型 | RMSE | R² | 方向准确率 | 夏普比率 | 最大回撤 | 持仓比例 |
+|---|---:|---:|---:|---:|---:|---:|
+| 无预测（ŷ = 0） | **0.011975** | **0.000** | — | — | — | 0% |
+| DENFIS 冻结版 | 0.012066 | −0.019 | 0.501 | **0.654** | **20.3%** | 34.4% |
+| XGBoost | 0.012009 | −0.010 | **0.508** | 0.238 | 32.2% | 53.6% |
+| LSTM | 0.012043 | −0.016 | 0.485 | 0.407 | 27.5% | 30.7% |
+| 买入持有 | — | — | — | 1.112 | 38.6% | 100% |
 
-1. Is frozen as the main comparison and predict-then-update online adaptation
-   as a separate extension acceptable?
-2. How should a self-written established method and the cap/merge/online
-   extensions be described for the bonus criterion?
-3. Are long/flat and one-way 10 bp costs appropriate, and how should forecast
-   error versus strategy risk/return be discussed?
+统计检验：Diebold–Mariano 在任意模型对之间均不显著（DENFIS 对 XGBoost
+p = 0.219；在线版对冻结版 p = 0.274）。DENFIS 夏普比率的 95% 平稳自助置信区间为
+**[−0.041, 1.309]**，跨零。所有模型的合并 R² 均为负值。
 
-Answers must be recorded after the actual discussion in docs/consultation.md.
+**也就是说：没有精度优势，也没有统计上成立的交易优势。** DENFIS 的点估计夏普比率
+最高、回撤最低，但低于买入持有，且置信区间跨零。
+
+更关键的是，**四个模型都没有跑赢零预测**：XGBoost 差 0.28%、LSTM 差 0.57%、
+DENFIS 冻结版差 0.76%、在线版差 1.76%。按您在邮件里的定义，这不只是 DENFIS
+的问题。
+
+## 3. 差距不是测试集造成的意外
+
+在**验证段**上（此时尚未接触任何测试数据），DENFIS 已经在 **9 折中的 7 折**落后于
+XGBoost。因此这是模型在这份数据上的性质，而不是某个测试年份运气不好。
+
+## 4. 六条改进路线，全部验证过
+
+每条路线都只用验证年份评估，测试年份没有参与任何选择；标注「探索性」的两行是在
+决策之后另行计算的检查。
+
+| 路线 | 改了什么 | 验证集结果 | 判定 |
+|---|---|---|---|
+| 1. 超参数网格 | 把聚类半径 `Dthr` 从 1.5 扩到 2.0 与 3.0 | 只有当模型塌缩成单条规则时验证误差才下降。取 `Dthr = 3.0` 时三折最终只剩 1 条规则，演化结构随之消失。探索性测试检查：合并 RMSE 0.012055（−0.09%），DM 检验 p = 0.216 | 否决 |
+| 2. 特征集 | 加入三个 `^STI` 特征：指数收益率、指数 20 日波动率、DBS 与 STI 的 20 日相关性 | DENFIS 仅在 3/9 折改善，中位数 **+0.06%（略差）**。LSTM 为 6/9（均值 −0.16%），XGBoost 为 5/9 | 否决 |
+| 3. 推理规则 | 只保留最激活的 *m* 条规则（DENFIS 原文机制；我们的实现是对全部规则归一化） | 5/9 折改善，均值 −0.074%，中位数 −0.066% | 幅度过小 |
+| 4. 后件学习 | 鲁棒递归最小二乘：相关熵（三个尺度）与 Huber | 最优点均值 −0.41%，由两折驱动。逐格检查发现其中一折只是单点运气（20 个参数点中仅 7 个变好，中位数 **+7.2%**）；另一折有效但不稳定（16/20 个点变好，中位数 −1.7%，部分配置会失控） | 否决 |
+| 5. 自助聚合（bagging） | 8 个自助重采样模型，预测取平均 | 在实际会被选中的那个参数点上：3/9 折获胜，均值 **+0.07%**。但整张网格上有 12–19/20 个点改善（中位数 −2% 至 −19%）：bagging 修的是不稳定配置，而基于验证集的选参本来就会避开这些配置 | 否决 |
+| 6. 与基线混合 | DENFIS 与 XGBoost 五五混合，以及每折最优权重 | 五五混合在 3/9 折胜过 XGBoost（均值 +0.07%）。即使允许在同一份验证数据上拟合权重，仍有 **5/9 折选出 w = 0**，即完全丢弃 DENFIS | 否决 |
+
+第 5、6 两条从不同角度说明同一件事：模型的方差已经被「基于验证集的选参」控制住了；
+而它与 XGBoost 的预测误差相关性太高，混合没有价值。
+
+## 5. 文献说明了什么，又没说明什么
+
+这一模型族的公开改进，对照的几乎都是其他模糊模型（eTS、SAFIS、PANFIS、FLEXFIS，
+或 type-1 对 type-2），很少与调好超参数的梯度提升树比较。我们没有找到任何研究
+报告演化模糊系统在日频股票收益上胜过调参良好的 GBM（梯度提升树）。
+
+文献所推崇的机制——type-2 模糊集、参与式学习、核递归最小二乘、概念漂移检测、
+规则剪枝、在线 bagging——大多是在增加模型容量或自适应能力。这与我们的诊断正好
+相反：在这份数据上，每一次容量增加都让验证误差变大。
+
+## 6. 我们刻意没有做的事
+
+我们没有用测试年份的表现去选择参数、特征、混合权重或数据折。上面六条路线中的
+任何一条，只要摘取表现最好的那一折或最好的那个参数点，都能包装成一次「改进」。
+因此每条路线我们都同时列出了与之矛盾的整网格结果。完整重跑可以在约 1e-13 的
+精度内复现仓库中已提交的结果。
+
+## 7. 按您的定义：简化模型后的点估计排序
+
+您要求目标必须是价格或价格差，因此保持**次日对数收益（价格差）**。原始 13 特征
+模型仍然全负；我们把三个模型简化并强正则，配置全部只用验证年份选择。
+
+| 模型 | RMSE | 相对零预测 | 按折 95% 区间 | 为正折数 |
+|---|---:|---:|---|---:|
+| DENFIS（单规则 + 除息特征） | 0.011914 | **+0.510%** | [+0.022%, +1.067%] | 7/9 |
+| LSTM（小网络） | 0.011944 | +0.260% | [−0.028%, +0.491%] | 6/9 |
+| XGBoost（浅层） | 0.011950 | +0.212% | [−0.028%, +0.432%] | 6/9 |
+| 无预测 | 0.011975 | 0 | — | — |
+
+相对零预测 = 1 − RMSE<sub>模型</sub> / RMSE<sub>零预测</sub>。正值表示 RMSE 更低；
++0.510% 约等价于 R²<sub>零预测</sub> = +1.02%。
+
+**改了什么。** DENFIS 用一条规则和五个特征：验证集排名前三的 `ma5`、`boll_b`、
+`ret_0`，加上两个除息事件哑变量 `is_exdiv`、`is_post_exdiv_1`；除息日由
+`Adj Close/Close` 的正向跳变推断，共 48 个事件，特征在验证集上选出，`lam = 1.0`。
+XGBoost 用 depth 1、100 棵树的强正则配置；LSTM 用 hidden 8、dropout 0.3、
+weight decay 0.01 的小网络，从 16 个配置中按验证集选出。
+
+**怎么读。** 点估计上四条要求都成立：DENFIS +0.510% > LSTM +0.260% >
+XGBoost +0.212% > 零预测。DENFIS 领先 LSTM 0.25 个百分点、领先 XGBoost 0.30
+个百分点；除息特征只加给 DENFIS，两个基线没有受益。这仍是**点估计排序**，且
+除息事件只有 48 个；测试年份在诊断中被检查过，2026 留出集是唯一干净的确认集。
+
+## 8. 已收到的答复与今晚要确认的问题
+
+**已答复（11 月 11 日邮件）：**「比原基线更好」按预测误差的排序判定——DENFIS
+低于 XGBoost 与 LSTM，且两个基线低于无预测；指标可以自选，但必须包含无预测
+比较。按此定义，您认为原始结果**不达标**，并怀疑实现有误。此后我们把三个模型
+简化并强正则，并给 DENFIS 加了验证集选出的除息特征；在次日价格差上，点估计
+排序成立，DENFIS 领先约 0.25 个百分点。负结果是否可接受、若不可接受走哪条路，
+尚未答复。
+
+**我们带上来的三项检查**
+
+- **目标定义。** 标签是 `ln(P_{t+1}/P_t)`，即价格差，不是价格水平
+  （`src/features.py:87`）。按字面预测价格水平的 pilot 显示：最好的模型也只能
+  学成 `P̂ ≈ P_t`，价格 RMSE 仅改善 0.07%、折算回收益为 −0.20%；XGBoost 无法
+  外推价格水平，2024 年预测均值 25.27、实际 31.57。
+- **实现正确性。** 在已知信号的合成目标上（`y = 0.25·ret_0 + N(0, 0.012)`，
+  同一套折），同一条流水线的 DENFIS 比零预测好 2.45%，XGBoost 好 2.10%，
+  LSTM 好 1.48%。流水线能学到真信号。
+- **范围。** 按无预测基准，四个模型全部更差：零预测 RMSE 0.011975，
+  XGBoost 0.012009（−0.28%）、LSTM 0.012043（−0.57%）、DENFIS 冻结 0.012066
+  （−0.76%）。不只是 DENFIS 不达标。
+
+**今晚想确认的四个问题**
+
+1. 您接受这种**简化后的配置**作为正式的 DENFIS / XGBoost / LSTM 对比吗？
+   DENFIS 只剩一条规则、没有演化结构，并加了两个验证集选出的除息特征；
+   XGBoost 只有 depth 1；LSTM 是小网络。三者都是验证集选出来的；原始 13 特征
+   模型仍然全负。
+
+2. **点估计排序是否足够**，还是要求统计显著？三个模型的区间都含零；如果要求
+   显著，这个结果不够。报告里我们会同时给出排序和不确定性。
+
+3. 我们可以把这一版**预注册**，在 11 月 15 日冻结后到 **2026 留出集**上只跑
+   一次吗？2017–2025 已经在诊断中看过；2026 是唯一干净的确认集。
+
+4. 如果简化版不接受，您认为什么证据才能说明实现没问题、预测确实有效？是接受
+   一份严谨的负结果，还是必须换目标/换基线？
+
+## 9. 不同答复下的下一步
+
+| 您的答复 | 我们的下一步 | 所需时间 |
+|---|---|---|
+| 接受简化配置，点估计排序即可 | 预注册协议 v1.2；11 月 15 日冻结后在 2026 留出集上跑一次；报告中明确说明简化与不确定性 | 等留出集 |
+| 接受简化配置，但要求统计显著 | 补做 Clark–West / 模型置信集；若仍不显著，按负结果或您指定的方向处理 | 1 天 |
+| 不接受简化配置 | 回到原始模型则仍不达标；需要您授权换目标或接受负结果 | 2–3 天 |
+| 仍怀疑实现 | 请指定检查；我们按您指定的方式重跑并回报 | 1 天 |
+| 以上都不合适 | 希望您在 11 月 15 日冻结前给出方向性建议 | — |
+
+---
+
+*支撑材料：`results/summary.csv`、`results/statistical_tests.json`、
+`results/analysis/validation_grid.csv`、`docs/naive_zero.csv`、
+`docs/price_level_pilot.md`、`scripts/synthetic_signal_check.py`、
+`docs/return_pilot.md`、`scripts/return_pilot.py`、
+`docs/results_table.md`、`docs/statistical_tests.md`、`docs/leakage_audit.md`。
+最终 Notebook：
+`writing/AI6124_Project_Group18_HuJunyu_LinJingzhao.ipynb`。*
