@@ -25,6 +25,8 @@ Internal workplans and the course proposal are kept out of this repository.
 - [x] ^STI transfer alignment helper for the method workstream
 - [x] DENFIS implementation and nine-fold predictions (frozen + online)
 - [x] Method report, integration notebook and five-slide draft (`writing/`)
+- [x] Consultation and implementation checks: target label, synthetic signal, no-prediction scope (2026-11-11)
+- [x] Original-target pilots: simplified models and ex-dividend features (2026-11-11)
 - [ ] Joint review, consultation decisions, scheduled freeze and final holdout
 - [ ] Final notebook and slides (due 2026-11-18 23:59)
 
@@ -44,6 +46,30 @@ comparison to report without overclaiming.
 The online extension is reported separately: pooled RMSE 0.012185 and Sharpe
 0.260, below frozen DENFIS on this run. DM comparisons are not significant;
 see `docs/statistical_tests.md`. Method-line handoff: [docs/handoff_to_B.md](docs/handoff_to_B.md).
+
+### Original-target pilots (simplified models)
+
+The full 13-feature models overfit a weak signal and all lose to the zero
+forecast. The diagnostics then simplified each model while keeping the same
+next-day close-to-close log-return target:
+
+| model | RMSE skill vs zero | folds > 0 | configuration |
+|---|---:|---:|---|
+| DENFIS, one rule + ex-dividend dummies | **+0.510%** | 7/9 | `ma5`, `boll_b`, `ret_0`, `is_exdiv`, `is_post_exdiv_1`; `max_rules=1`, `Dthr=3.0`, `λ=1.0` |
+| LSTM, small network | +0.260% | 6/9 | 8 hidden, dropout 0.3, weight decay 1e-2 |
+| XGBoost, shallow | +0.212% | 6/9 | depth 1, learning rate 0.01, 100 trees |
+| no prediction (ŷ = 0) | 0 | — | benchmark |
+
+`RMSE skill vs zero = 1 − RMSE_model / RMSE_zero`, pooled over the 2017–2025
+test years; the zero forecast has RMSE ≈ 0.011975. The point-estimate ordering
+DENFIS > LSTM > XGBoost > zero holds for the original target.
+
+Caveats: the ex-dividend pair helps DENFIS only (XGBoost and LSTM are
+unchanged-to-worse); on validation years LSTM (+0.520%) is still above DENFIS
+with the ex-dividend pair (+0.432%), so the test ordering is not
+validation-guaranteed; the intervals are wide and the test years were already
+inspected during the diagnostics. See `docs/return_pilot.md` and
+`docs/event_feature_pilot.md`. The 2026 holdout is the clean confirmation.
 
 DENFIS 2026 holdout remains reserved until the scheduled freeze. Baseline
 holdout artifacts predate this handoff and must not guide further tuning.
@@ -66,6 +92,8 @@ python scripts/make_results_table.py                # docs/results_table.md
 python scripts/plot_results.py                      # equity and DA figures
 python scripts/statistical_tests.py                 # docs/statistical_tests.md
 python scripts/leakage_audit.py                     # docs/leakage_audit.md
+python scripts/return_pilot.py                      # simplified models, original target
+python scripts/event_feature_pilot.py               # ex-dividend feature pilot
 ```
 
 The implemented `src/models/denfis.py` is exposed through
