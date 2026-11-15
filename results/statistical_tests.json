@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-11T05:58:51.958484+00:00",
+  "generated_at": "2026-11-15T09:30:48.777422+00:00",
   "test_years": "2017-2025 (nine regular folds, holdout excluded)",
   "pooled": {
     "denfis_frozen": {
@@ -197,6 +197,98 @@
       "n": 2258,
       "outcome": "not significant",
       "a_worse": true
+    }
+  ],
+  "clark_west": [
+    {
+      "model": "denfis_frozen",
+      "mean_loss_diff": 2.327271367084616e-06,
+      "cw_stat": 1.7262118600454308,
+      "p_value": 0.04215465257067331,
+      "n": 2258,
+      "outcome": "rejects no-information null at 5%"
+    },
+    {
+      "model": "denfis_online",
+      "mean_loss_diff": 6.836273552197339e-07,
+      "cw_stat": 0.3066520961215291,
+      "p_value": 0.37955409788606154,
+      "n": 2258,
+      "outcome": "positive, not significant"
+    },
+    {
+      "model": "lstm",
+      "mean_loss_diff": 4.14499060061873e-07,
+      "cw_stat": 0.39582700951382,
+      "p_value": 0.34611632502979994,
+      "n": 2258,
+      "outcome": "positive, not significant"
+    },
+    {
+      "model": "xgboost",
+      "mean_loss_diff": 4.177920916906819e-07,
+      "cw_stat": 0.520322317762077,
+      "p_value": 0.3014194716347284,
+      "n": 2258,
+      "outcome": "positive, not significant"
+    }
+  ],
+  "model_confidence_set": {
+    "included": [
+      "denfis_frozen",
+      "denfis_online",
+      "lstm",
+      "no_prediction",
+      "xgboost"
+    ],
+    "eliminated": [],
+    "alpha": 0.1,
+    "n_boot": 2000,
+    "avg_block": 20,
+    "seed": 123
+  },
+  "mde": [
+    {
+      "comparison": "ma5",
+      "observed_rmse_skill": 0.0039316180459683,
+      "mde_rmse_skill": 0.0050136428727047,
+      "power_at_observed": 0.5941314352841032,
+      "n": 2258
+    },
+    {
+      "comparison": "ret_3",
+      "observed_rmse_skill": 0.001454017098268,
+      "mde_rmse_skill": 0.0023167454633497,
+      "power_at_observed": 0.4203898227049782,
+      "n": 2258
+    },
+    {
+      "comparison": "constant mean",
+      "observed_rmse_skill": 0.0014797938359921,
+      "mde_rmse_skill": 0.0022566339094249,
+      "power_at_observed": 0.4514089400196444,
+      "n": 2258
+    },
+    {
+      "comparison": "denfis_frozen",
+      "observed_rmse_skill": -0.0075871032393439,
+      "mde_rmse_skill": 0.0126018386660452,
+      "power_at_observed": 0.3989375773415355,
+      "n": 2258
+    },
+    {
+      "comparison": "xgboost",
+      "observed_rmse_skill": -0.0028267166397621,
+      "mde_rmse_skill": 0.0080439346177317,
+      "power_at_observed": 0.166001549841032,
+      "n": 2258
+    },
+    {
+      "comparison": "lstm",
+      "observed_rmse_skill": -0.0056896689209906,
+      "mde_rmse_skill": 0.0105377444945161,
+      "power_at_observed": 0.3317960163677432,
+      "n": 2258
     }
   ],
   "denfis_available": true

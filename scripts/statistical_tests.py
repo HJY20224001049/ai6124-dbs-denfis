@@ -34,7 +34,9 @@ from src.evaluation.backtest import sharpe  # noqa: E402
 from src.evaluation.metrics import compute_metrics  # noqa: E402
 from src.evaluation.stats import (  # noqa: E402
     bootstrap_sharpe_ci,
+    clark_west,
     dm_test,
+    model_confidence_set,
     newey_west_lag,
 )
 
@@ -71,6 +73,21 @@ def align_predictions(a: pd.DataFrame, b: pd.DataFrame) -> pd.DataFrame:
         raise ValueError("models have no test dates in common")
     if not np.allclose(merged["y_true_a"], merged["y_true_b"], atol=1e-10, rtol=0.0):
         raise ValueError("models disagree on y_true for shared dates")
+    return merged.sort_values("date").reset_index(drop=True)
+
+
+def align_all(frames: dict[str, pd.DataFrame], models: list[str]) -> pd.DataFrame:
+    """Inner-join every model's predictions on date into one loss matrix input."""
+    merged = frames[models[0]][["date", "y_true", "y_pred"]].rename(
+        columns={"y_pred": models[0]}
+    )
+    for model in models[1:]:
+        part = frames[model][["date", "y_pred"]].rename(columns={"y_pred": model})
+        merged = merged.merge(part, on="date", how="inner", validate="one_to_one")
+    for model in models[1:]:
+        other = frames[model].set_index("date")["y_true"].reindex(merged["date"])
+        if not np.allclose(merged["y_true"], other, atol=1e-10, rtol=0.0):
+            raise ValueError("models disagree on y_true for shared dates")
     return merged.sort_values("date").reset_index(drop=True)
 
 
@@ -190,6 +207,54 @@ def main() -> None:
             }
         )
 
+    cw_rows = []
+    if "no_prediction" in models:
+        for model in models:
+            if model == "no_prediction":
+                continue
+            aligned = align_predictions(pooled_frames[model], pooled_frames["no_prediction"])
+            result = clark_west(aligned["y_true_a"], aligned["y_pred_b"], aligned["y_pred_a"])
+            if result["p_value"] < 0.05 and result["cw_stat"] > 0:
+                outcome = "rejects no-information null at 5%"
+            elif result["cw_stat"] > 0:
+                outcome = "positive, not significant"
+            else:
+                outcome = "no evidence of information"
+            cw_rows.append(
+                {
+                    "model": model,
+                    "mean_loss_diff": result["mean_loss_diff"],
+                    "cw_stat": result["cw_stat"],
+                    "p_value": result["p_value"],
+                    "n": result["n"],
+                    "outcome": outcome,
+                }
+            )
+
+    common = align_all(pooled_frames, models)
+    loss_matrix = np.column_stack(
+        [(common["y_true"].to_numpy() - common[model].to_numpy()) ** 2 for model in models]
+    )
+    mcs = model_confidence_set(
+        loss_matrix, models, alpha=0.10,
+        n_boot=args.n_boot, avg_block=args.block, seed=args.seed,
+    )
+
+    mde_rows = []
+    mde_path = RESULTS_DIR / "analysis" / "detectable_skill.csv"
+    if mde_path.exists():
+        mde = pd.read_csv(mde_path)
+        for _, row in mde.iterrows():
+            mde_rows.append(
+                {
+                    "comparison": str(row["rule"]),
+                    "observed_rmse_skill": float(row["observed_rmse_skill"]),
+                    "mde_rmse_skill": float(row["mde_rmse_skill"]),
+                    "power_at_observed": float(row["power_at_observed"]),
+                    "n": int(row["n"]),
+                }
+            )
+
     has_denfis = any(model.startswith("denfis") for model in models)
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -197,6 +262,9 @@ def main() -> None:
         "pooled": pooled,
         "sharpe_ci": ci,
         "dm": dm_rows,
+        "clark_west": cw_rows,
+        "model_confidence_set": mcs,
+        "mde": mde_rows,
         "denfis_available": has_denfis,
     }
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -284,6 +352,87 @@ def main() -> None:
         )
     else:
         lines.append("_No comparable pairs available._")
+
+    if cw_rows:
+        lines += [
+            "",
+            "## Clark–West test against the zero forecast (one-sided)",
+            "",
+            "The zero forecast is the restricted model nested in any linear forecast; "
+            "for the tree and LSTM baselines the nesting is approximate, so read their "
+            "rows as a diagnostic rather than a formal nested test. The null is that "
+            "every coefficient of the model is zero, and `p_value` is one-sided. The "
+            "adjusted loss differential adds `(pred_zero − pred_model)²`, which does "
+            "**not** make this an MSE-improvement test: the adjustment credits the "
+            "forecast's own variance, so a positive statistic alongside a worse raw "
+            "RMSE is the signature of an over-dispersed forecast (right sign, too "
+            "large). Use the DM rows and the confidence set for accuracy ordering; "
+            "use this table only for whether the forecast carries information.",
+            "",
+        ]
+        lines.append(
+            markdown_table(
+                [
+                    {**row,
+                     "mean_loss_diff": f"{row['mean_loss_diff']:+.2e}",
+                     "p_value": f"{row['p_value']:.4g}"}
+                    for row in cw_rows
+                ],
+                ["model", "mean_loss_diff", "cw_stat", "p_value", "n", "outcome"],
+            )
+        )
+
+    lines += [
+        "",
+        "## Model confidence set (range-based, α = 0.10)",
+        "",
+        "Hansen, Lunde and Nason (2011): models are eliminated one at a time, "
+        "largest standardised excess loss first, until the range statistic falls "
+        "below its stationary-bootstrap critical value. The surviving set contains "
+        "every model that cannot be separated from the best at this level. "
+        "Elimination order is data-driven; a wide set is the honest outcome for "
+        "daily returns.",
+        "",
+        f"Included: {', '.join(f'`{name}`' for name in mcs['included'])}",
+        "",
+    ]
+    if mcs["eliminated"]:
+        lines.append(
+            markdown_table(
+                [
+                    {**row, "tr": f"{row['tr']:.3f}", "critical": f"{row['critical']:.3f}"}
+                    for row in mcs["eliminated"]
+                ],
+                ["step", "model", "tr", "critical"],
+            )
+        )
+    else:
+        lines.append("_No model was eliminated._")
+
+    if mde_rows:
+        lines += [
+            "",
+            "## Minimum detectable effect (power check)",
+            "",
+            "80%-power minimum detectable RMSE skill at the pooled sample size, "
+            "from `scripts/detectable_skill.py`. An observed skill below the MDE "
+            "cannot be reliably distinguished from zero in this sample.",
+            "",
+        ]
+        lines.append(
+            markdown_table(
+                [
+                    {**row,
+                     "observed_rmse_skill": f"{row['observed_rmse_skill']:+.2%}",
+                     "mde_rmse_skill": f"{row['mde_rmse_skill']:.2%}",
+                     "power_at_observed": f"{row['power_at_observed']:.2f}"}
+                    for row in mde_rows
+                ],
+                ["comparison", "observed_rmse_skill", "mde_rmse_skill",
+                 "power_at_observed", "n"],
+            )
+        )
+
     lines += [
         "",
         "## Reading the table",
@@ -293,6 +442,12 @@ def main() -> None:
         "- A significant DM result is evidence of a mean loss difference under "
         "the test assumptions. Comparisons are exploratory and not multiplicity-adjusted; "
         "the reference baseline is selected by pooled RMSE.",
+        "- The Clark–West statistic is one-sided: positive rejects the null that all "
+        "model coefficients are zero. It is not an MSE-improvement test — see the "
+        "note above the table.",
+        "- The model confidence set is the multiplicity-controlled summary: a model "
+        "outside it is significantly worse than the best one, a model inside it is not "
+        "distinguishable from the best at α = 0.10.",
         "- The Sharpe interval resamples contiguous blocks of days, preserving some "
         "autocorrelation; an interval spanning zero means the trading result is not "
         "distinguishable from no edge.",

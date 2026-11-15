@@ -28,8 +28,42 @@ Positive DM statistic = model A has the larger squared errors (worse forecast). 
 | denfis_online | xgboost | +4.27e-06 | 1.5092 | 0.1312 | 7 | 2258 | not significant |
 | denfis_online | denfis_frozen | +2.90e-06 | 1.0932 | 0.2743 | 7 | 2258 | not significant |
 
+## Clark–West test against the zero forecast (one-sided)
+
+The zero forecast is the restricted model nested in any linear forecast; for the tree and LSTM baselines the nesting is approximate, so read their rows as a diagnostic rather than a formal nested test. The null is that every coefficient of the model is zero, and `p_value` is one-sided. The adjusted loss differential adds `(pred_zero − pred_model)²`, which does **not** make this an MSE-improvement test: the adjustment credits the forecast's own variance, so a positive statistic alongside a worse raw RMSE is the signature of an over-dispersed forecast (right sign, too large). Use the DM rows and the confidence set for accuracy ordering; use this table only for whether the forecast carries information.
+
+| model | mean_loss_diff | cw_stat | p_value | n | outcome |
+|---|---|---|---|---|---|
+| denfis_frozen | +2.33e-06 | 1.7262 | 0.04215 | 2258 | rejects no-information null at 5% |
+| denfis_online | +6.84e-07 | 0.3067 | 0.3796 | 2258 | positive, not significant |
+| lstm | +4.14e-07 | 0.3958 | 0.3461 | 2258 | positive, not significant |
+| xgboost | +4.18e-07 | 0.5203 | 0.3014 | 2258 | positive, not significant |
+
+## Model confidence set (range-based, α = 0.10)
+
+Hansen, Lunde and Nason (2011): models are eliminated one at a time, largest standardised excess loss first, until the range statistic falls below its stationary-bootstrap critical value. The surviving set contains every model that cannot be separated from the best at this level. Elimination order is data-driven; a wide set is the honest outcome for daily returns.
+
+Included: `denfis_frozen`, `denfis_online`, `lstm`, `no_prediction`, `xgboost`
+
+_No model was eliminated._
+
+## Minimum detectable effect (power check)
+
+80%-power minimum detectable RMSE skill at the pooled sample size, from `scripts/detectable_skill.py`. An observed skill below the MDE cannot be reliably distinguished from zero in this sample.
+
+| comparison | observed_rmse_skill | mde_rmse_skill | power_at_observed | n |
+|---|---|---|---|---|
+| ma5 | +0.39% | 0.50% | 0.59 | 2258 |
+| ret_3 | +0.15% | 0.23% | 0.42 | 2258 |
+| constant mean | +0.15% | 0.23% | 0.45 | 2258 |
+| denfis_frozen | -0.76% | 1.26% | 0.40 | 2258 |
+| xgboost | -0.28% | 0.80% | 0.17 | 2258 |
+| lstm | -0.57% | 1.05% | 0.33 | 2258 |
+
 ## Reading the table
 
 - `mean_loss_diff` is mean squared error of A minus that of B; a positive value means A is worse.
 - A significant DM result is evidence of a mean loss difference under the test assumptions. Comparisons are exploratory and not multiplicity-adjusted; the reference baseline is selected by pooled RMSE.
+- The Clark–West statistic is one-sided: positive rejects the null that all model coefficients are zero. It is not an MSE-improvement test — see the note above the table.
+- The model confidence set is the multiplicity-controlled summary: a model outside it is significantly worse than the best one, a model inside it is not distinguishable from the best at α = 0.10.
 - The Sharpe interval resamples contiguous blocks of days, preserving some autocorrelation; an interval spanning zero means the trading result is not distinguishable from no edge.
