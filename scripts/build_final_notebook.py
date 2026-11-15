@@ -80,10 +80,13 @@ model selection. Results are preliminary until the scheduled freeze recorded in
 `docs/freeze.md`; the git commit that produced the artifacts is printed in
 Section 1 so that any figure can be traced back to a specific run.
 
-The headline finding is deliberately unflattering: none of the three models
-forecasts next-day returns well enough to beat buy-and-hold after costs, and no
-pairwise difference in forecast accuracy is statistically significant. Section 8
-explains what the fitted rules do show, and where the evidence stops.
+The headline finding has two layers. The frozen configuration (**B2**, Section
+5.7) beats the zero forecast by +0.59% pooled RMSE skill over 2017–2025, with
+8 of 9 test years positive, and is significantly more accurate than both zero and
+XGBoost; the full 13-feature DENFIS and the two baselines remain worse than the
+zero forecast. Trading still does not beat buy-and-hold after costs, and the 2026
+holdout shows only +0.14% skill. Section 8 separates what the forecasts contain
+from what the strategy earns.
 """)]
 
 
@@ -320,6 +323,34 @@ print(f"feature columns       : {len(FEATURES)} + label_date + {TARGET_COL}")
 print(f"date span of features : {frame[DATE_COL].min().date()} → {frame[DATE_COL].max().date()}")
 
 frame[FEATURES].describe().T[["mean", "std", "min", "max"]].round(4)
+"""),
+        md("""
+**Two event dummies for the final configuration.** The frozen B2 model also uses
+`is_exdiv` and `is_post_exdiv_1`. Both are known in advance: the ex-dividend date
+is announced by the company, and it is also visible in the data as a positive jump
+in `Adj Close / Close` (the ratio removes the dividend, so it steps up on the ex
+date). The date itself is causal; the dummy does not look at the next day's price.
+The 13-feature protocol does not include them, so they enter only through the
+final configuration of Section 5.7, which was selected on validation years.
+"""),
+        code("""
+dates = pd.to_datetime(dbs[DATE_COL])
+ratio = dbs["Adj Close"].astype(float) / dbs["Close"].astype(float)
+exdiv_dates = set(dates[ratio.pct_change() > 0.005])
+
+event = pd.DataFrame({DATE_COL: dates})
+event["is_exdiv"] = event[DATE_COL].isin(exdiv_dates).astype(int)
+days_since = []
+counter = 99
+for date in event[DATE_COL]:
+    counter = 0 if date in exdiv_dates else min(counter + 1, 10)
+    days_since.append(counter)
+event["is_post_exdiv_1"] = (pd.Series(days_since) == 1).astype(int)
+
+frame = frame.merge(event, on=DATE_COL, how="left")
+print(f"ex-dividend dates     : {int(event['is_exdiv'].sum())}")
+print(f"post-ex-dividend days : {int(event['is_post_exdiv_1'].sum())}")
+frame[[DATE_COL, "is_exdiv", "is_post_exdiv_1"]].tail(3)
 """),
         md("""
 **Causality check.** The cheapest way to leak the future into a feature is an
@@ -600,6 +631,38 @@ each fold's metrics file and summarised in Section 8.1. The operational risk is
 not runtime but rule growth: a small `Dthr` on a wide feature distribution will
 saturate the cap, which is why `n_rules` is reported next to every result.
 """),
+        md("""
+### 5.7 The frozen configuration
+
+The final configuration was chosen on validation years only. For every fold,
+candidates are fitted on labels through Y−2 and scored on Y−1; the selection
+script does not index the test years or the 2026 holdout, and the scored window is
+one year per fold, nine in total.
+
+The selected model, **B2**, averages three one-rule DENFIS models. Each uses one
+feature — `ma5`, `boll_b` or `ret_0` — together with the two ex-dividend dummies,
+with `Dthr = 3.0`, `λ = 1.0` and `max_rules = 1`. On the validation years it
+scores mean RMSE skill **+0.497%** against the zero forecast, **8 of 9** folds
+positive, pooled **+0.480%**, folded 95% CI **[+0.161%, +0.780%]**. Sixteen
+one-factor variants (component count, ex-dividend encodings, weighting scheme,
+shrinkage, rolling windows, inner calibration) were rejected under an adoption
+rule fixed before the run.
+
+With a single rule the normalised activation is identically one, so each component
+reduces to a linear fit on `[1, x, dummies]`. The rule covariance starts at
+`100·I`, which acts as a prior precision of 0.01, and `λ = 1` makes the recursion
+terminate at the closed-form ridge solution; two tests in
+`tests/test_denfis_contract.py` verify that equality to machine precision. On the
+training windows used here the prior moves the fit by less than 1.5×10⁻⁶ of the
+standard deviation of next-day returns, so the fuzzy layer supplies the
+normalisation and the local weighting rather than additional capacity, and the
+ensemble averages three weakly correlated linear views of the same target.
+
+The configuration was frozen on 2026-11-15 (Section 7.6, `docs/freeze.md`). Those
+validation numbers are selection evidence, not confirmation: the test years had
+already been inspected during the diagnostics, so the 2026 holdout is the only
+clean check.
+"""),
     ]
 
 
@@ -691,7 +754,7 @@ exposure as percentages to one decimal.
 summary = pd.read_csv(RESULTS_DIR / "summary.csv")
 pooled = summary[summary["scope"] == "pooled"].set_index("model")
 
-MAIN_MODELS = ["denfis_frozen", "xgboost", "lstm"]
+MAIN_MODELS = ["denfis_b2", "denfis_frozen", "xgboost", "lstm"]
 
 def format_row(model: str) -> dict:
     row = pooled.loc[model]
@@ -845,22 +908,66 @@ dm_table = pd.DataFrame([
 ])
 dm_table.set_index(["A", "B"])
 """),
+        code("""
+cw_table = pd.DataFrame([
+    {
+        "model": entry["model"],
+        "CW statistic": f"{entry['cw_stat']:.3f}",
+        "p-value (one-sided)": f"{entry['p_value']:.4g}",
+        "outcome": entry["outcome"],
+    }
+    for entry in stats["clark_west"]
+])
+mcs = stats["model_confidence_set"]
+print("MCS at alpha =", mcs["alpha"], "->", ", ".join(mcs["included"]))
+display(cw_table.set_index("model"))
+pd.DataFrame(mcs["eliminated"]).rename(
+    columns={"tr": "T_R", "critical": "critical value"}
+).set_index("step")
+"""),
+        code("""
+mde = pd.DataFrame([
+    {
+        "comparison": row["comparison"],
+        "observed RMSE skill": f"{row['observed_rmse_skill']:+.2%}",
+        "minimum detectable effect (80% power)": f"{row['mde_rmse_skill']:.2%}",
+        "power at observed effect": f"{row['power_at_observed']:.2f}",
+    }
+    for row in stats["mde"]
+])
+mde.set_index("comparison")
+"""),
         md("""
-Read together, these two tables settle the report's main claim. DENFIS-frozen has
-the highest *point estimate* of pooled Sharpe, but its interval spans zero and
-runs from slightly negative to well above 1 — the data simply cannot tell its edge
-apart from noise. The DM tests point the same way: no pairwise accuracy difference
-is significant at any conventional level. We therefore do not claim that DENFIS
-forecasts better than XGBoost or LSTM, and we do not claim that the strategy is
-profitable. What can be said is narrower and still useful: **the model is
-competitive on this task, on the folds where the rule count stays small it is more
-interpretable than either baseline, and it takes less drawdown than
-buy-and-hold.**
+The power table is the honest frame for every other number in this section: at
+n = 2258, an effect smaller than roughly 0.5–1.3 percentage points of RMSE skill
+cannot be resolved with 80% power. B2's +0.59% is above the bound for the
+feature-level comparisons and below the bound for the DENFIS-vs-zero comparison,
+which is why its p-value is small but its interval is wide.
+"""),
+        md("""
+Read together, the tables separate two claims that are easy to confuse.
+
+*Accuracy.* B2 is the only model with a positive pooled RMSE skill, and the
+Diebold–Mariano statistic rejects equal accuracy against both the zero forecast
+(p = 0.0024) and XGBoost (p = 0.0006). Every other comparison remains
+insignificant. The Clark–West test rejects the no-information null for B2 as well,
+but its adjustment credits the forecast's own variance, so it is not a second
+accuracy test; read it as evidence that the forecast carries information.
+
+*Survives multiplicity?* The range-based model confidence set keeps B2 alone
+at α = 0.10, eliminating XGBoost, the zero forecast, the full DENFIS, the LSTM and
+the online variant in that order. That is a statement about this nine-year sample,
+not about the population.
+
+*Profitability.* Nothing here shows a profitable strategy. Every Sharpe interval
+spans zero, B2's point estimate is 0.537 against 1.113 for buy-and-hold, and its
+exposure is 41.5%: the model is useful for knowing when not to be invested, not
+for beating the asset's own return.
 
 ### 7.5 Reproducing one fold from scratch
 
 Everything above reads saved artifacts. To show those artifacts are genuinely the
-output of the code in this repository, this section retrains all four models on
+output of the code in this repository, this section retrains every model in the main comparison on
 fold `r1f1` — selection grid, threshold selection, final fit, test prediction —
 and asserts the result matches the committed CSV to within `1e-9`.
 
@@ -907,6 +1014,32 @@ for name, factory, grid, online, sequence_len in specs:
         "seconds": f"{time.perf_counter() - started:.1f}",
     })
 
+from src.models.ensemble import DENFISEnsemble
+
+b2_columns = ["ma5", "boll_b", "ret_0", "is_exdiv", "is_post_exdiv_1"]
+b2_components = [[0, 3, 4], [1, 3, 4], [2, 3, 4]]
+started = time.perf_counter()
+b2_prediction, b2_metrics = run_fold(
+    "denfis_b2",
+    lambda params, seed: DENFISEnsemble(b2_components, seed=seed, **params),
+    repro_fold, frame, [{"dthr": 3.0, "lam": 1.0}],
+    seed=GLOBAL_SEED, columns=b2_columns,
+)
+b2_saved = pd.read_csv(RESULTS_DIR / "preds" / "denfis_b2" / "r1f1.csv")
+np.testing.assert_array_equal(
+    b2_prediction["date"].to_numpy(), b2_saved["date"].to_numpy()
+)
+b2_diff = float(np.max(np.abs(b2_prediction["y_pred"].to_numpy()
+                            - b2_saved["y_pred"].to_numpy())))
+assert b2_diff < 1e-9, f"denfis_b2: live run differs from the saved prediction"
+repro_rows.append({
+    "model": "denfis_b2",
+    "live RMSE": f"{b2_metrics['rmse']:.6f}",
+    "saved RMSE": f"{b2_saved.assign(se=lambda d: (d.y_true - d.y_pred) ** 2)['se'].mean() ** 0.5:.6f}",
+    "max |Δ prediction|": f"{b2_diff:.1e}",
+    "seconds": f"{time.perf_counter() - started:.1f}",
+})
+
 pd.DataFrame(repro_rows).set_index("model")
 """),
         md("""
@@ -928,7 +1061,7 @@ holdout_rows = []
 for model in MAIN_MODELS + ["denfis_online"]:
     path = RESULTS_DIR / "preds" / model / "holdout.csv"
     if not path.exists():
-        holdout_rows.append({"model": model, "holdout": "reserved until the scheduled freeze"})
+        holdout_rows.append({"model": model, "holdout": "not run: only the frozen B2 is evaluated on the holdout"})
         continue
     holdout_summary = summary[(summary["model"] == model)
                               & (summary["scope"] == "holdout")]
@@ -944,11 +1077,13 @@ for model in MAIN_MODELS + ["denfis_online"]:
 pd.DataFrame(holdout_rows).set_index("model")
 """),
         md("""
-Baseline holdout predictions were produced before the DENFIS line was delivered;
-they exist but they were not used to choose anything. The DENFIS holdout is run
-exactly once, after the nine-fold results are frozen, and its outcome is reported
-whatever it shows. Reporting it here before that point would break the blind
-protocol.
+The 2026 holdout was read once, after B2 was frozen on 2026-11-15, and it is
+reported here as it came out: n = 209 (2026-01 to 2026-10), RMSE 0.010140 against
+0.010154 for the zero forecast, a skill of **+0.14%**, directional accuracy 0.522
+and a Sharpe of 1.71 at 12% exposure. The forecast skill is small; the Sharpe comes
+from ten months at low exposure and should not be read as a strategy result. The
+baseline holdout predictions predate the method line and were not used to choose
+anything.
 """),
         md("""
 ### 7.7 Implementation check: does the pipeline learn a signal when one exists?
@@ -963,8 +1098,8 @@ y_syn = 0.25 * ret_0 + N(0, 0.012)
 
 The oracle R² of that planted signal is about 5%. The same folds, scaler,
 factories and CV runner are used. If the models beat no prediction here, the
-pipeline is learning when a signal exists; the negative result on the real target
-is then a property of the data.
+pipeline is learning when a signal exists; a weak result on the real target
+is then a property of the data, not of the code.
 
 Run: `python scripts/synthetic_signal_check.py --models denfis,xgboost,lstm`
 """),
@@ -1162,35 +1297,41 @@ transfer[["protocol", "fold_id", "test_year", "n", "rmse", "da", "sharpe",
         md("""
 ### 8.5 Strengths, weaknesses and how this compares to published work
 
-**What this implementation does well.** Six of the nine folds settle between 11 and
-86 rules, and on those the rule base is small enough to read: each prediction
-decomposes into a handful of local terms, and the model needs no GPU. Its drawdown
-is materially lower than both baselines and buy-and-hold, which is consistent with
-a model that stays out of the market when its forecast is near zero.
+**What this implementation does well.** The frozen configuration beats the zero
+forecast by +0.59% pooled RMSE skill, 8 of 9 test years positive, and the
+Diebold–Mariano statistic separates it from both zero (p = 0.0024) and XGBoost
+(p = 0.0006); it is the only model the confidence set retains. Its drawdown is
+27.8% against 38.6% for buy-and-hold, at 41.5% exposure, so the model is useful
+for staying out of the market when its forecast is near zero. In the full
+13-feature configuration, six of nine folds settle between 11 and 86 rules, small
+enough for each prediction to decompose into a handful of local terms.
 
-**Where it is weak.** In the three folds that saturate the 200-rule cap, "an
-interpretable fuzzy model" is no longer an accurate description of what was fitted
-— the cap, not the data, chose the model size. Forecast error is not better than
-the baselines, and the
-directional accuracy is indistinguishable from 50%. The model's advantage, if any,
-is in *when not to trade*, not in knowing which way the price will move. The
-online variant adds an update rule that the frozen one lacks, yet it did not
-improve results on this run — plausibly because one year of test data is too short
-for adaptation to pay for its extra variance.
+**Where it is weak.** The edge is small in economic terms. The 2026 holdout shows
++0.14% skill; directional accuracy is 51.5%, barely above a coin flip; Sharpe is
+0.537 against 1.113 for buy-and-hold. The winning model is the one-rule limit of
+the method: each component is a linear fit with a weak prior, so "interpretable
+fuzzy rules" describes the full configuration in Section 5.1–5.4, not the frozen
+B2. In that full configuration three folds saturate the 200-rule cap, where the
+cap rather than the data chooses the model size. The online variant adds an update
+rule yet did not improve on the frozen fit — plausibly because one year of test
+data is too short for adaptation to pay for its extra variance.
 
 **How far this is from published work.** The comparison with the literature is
-one of scope, not of score. Published evolving-fuzzy systems are often evaluated
-on benchmark regression streams or on higher-frequency data where the
-signal-to-noise ratio is more favourable. Deep neuro-fuzzy models such as DCNFIS
-operate on image data with vastly more structure per example. We deliberately do
-not claim that our RMSE or Sharpe is comparable to any number reported in those
-papers: different data, different target, different evaluation. What the
-literature supplies here is the mechanism (ECM, TSK, RLS) and the caution that
-evolving structure is not automatically an advantage.
+one of magnitude, not of score. A pooled R² of 0.0077 and an IC of 0.095 sit in
+the range reported for daily and monthly equity-return prediction, but the data,
+target and evaluation differ, so we do not claim comparability with any specific
+published number. Published evolving-fuzzy systems are often evaluated on
+benchmark regression streams or higher-frequency data with a more favourable
+signal-to-noise ratio; deep neuro-fuzzy models such as DCNFIS operate on image
+data. What the literature supplies here is the mechanism (ECM, TSK, RLS) and the
+caution that evolving structure is not automatically an advantage.
 
-**The honest summary.** On this task, with these features and this sample,
-DENFIS is a competitive and interpretable model, not a superior one. Section 9
-lists what would be needed to make the "superior" claim testable.
+**The honest summary.** B2 delivers a small, statistically detectable forecast
+improvement over the zero forecast and the baselines, concentrated in three weakly
+correlated features and the ex-dividend calendar. It does not produce a strategy
+that beats buy-and-hold, and the full multi-rule evolving model is not the
+configuration that won. Section 9 lists what would be needed to make a stronger
+claim testable.
 """),
     ]
 

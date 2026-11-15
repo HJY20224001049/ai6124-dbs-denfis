@@ -40,6 +40,7 @@ COLORS = {
     "no_prediction": "#6B7280",
     "xgboost": "#94510F",
     "lstm": "#0E6B5A",
+    "denfis_b2": "#B5461B",
     "denfis_frozen": "#1F4E79",
     "denfis_online": "#7A3E8C",
 }
@@ -169,11 +170,11 @@ def main() -> None:
     if not models:
         raise SystemExit("No predictions found in results/preds")
     print("models:", ", ".join(models))
-    main_models = [m for m in models if m in ("denfis_frozen", "xgboost", "lstm")]
+    main_models = [m for m in models if m in ("denfis_b2", "denfis_frozen", "xgboost", "lstm")]
     print(plot_equity(main_models))
     print(plot_directional_accuracy(main_models))
     skill_models = [
-        m for m in ("no_prediction", "denfis_frozen", "xgboost", "lstm") if m in models
+        m for m in ("no_prediction", "denfis_b2", "denfis_frozen", "xgboost", "lstm") if m in models
     ]
     if skill_models:
         print(plot_rmse_skill(skill_models))
