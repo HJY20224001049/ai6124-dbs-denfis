@@ -27,25 +27,31 @@ Internal workplans and the course proposal are kept out of this repository.
 - [x] Method report, integration notebook and five-slide draft (`writing/`)
 - [x] Consultation and implementation checks: target label, synthetic signal, no-prediction scope (2026-11-11)
 - [x] Original-target pilots: simplified models and ex-dividend features (2026-11-11)
-- [ ] Joint review, consultation decisions, scheduled freeze and final holdout
+- [x] B2 frozen and run once on the 2017–2025 test years and the 2026 holdout (2026-11-15)
+- [ ] Joint review and method-line sections
 - [ ] Final notebook and slides (due 2026-11-18 23:59)
 
-Current pooled result — full protocol models, 13 causal features (2017–2025, 10 bp one-way cost):
+Current pooled result — frozen B2 plus the protocol models (2017–2025, 10 bp one-way cost):
 
 | model | RMSE | RMSE skill vs zero | direction acc. | Sharpe | max drawdown | exposure |
 |---|---:|---:|---:|---:|---:|---:|
 | no prediction (ŷ = 0) | 0.011975 | 0 | — | — | — | 0% |
+| **DENFIS B2 (frozen)** | **0.011904** | **+0.59%** | 0.515 | 0.537 | 27.8% | 41.5% |
 | XGBoost | 0.012009 | −0.28% | 0.508 | 0.238 | 32.2% | 53.6% |
 | LSTM | 0.012043 | −0.57% | 0.485 | 0.407 | 27.5% | 30.7% |
-| DENFIS frozen | 0.012066 | −0.76% | 0.501 | 0.654 | 20.3% | 34.4% |
+| DENFIS frozen (full 13-feature) | 0.012066 | −0.76% | 0.501 | 0.654 | 20.3% | 34.4% |
 | buy & hold | — | — | — | 1.113 | 38.6% | 100% |
 
-All three models are **worse than the zero forecast** on RMSE, have pooled R² below
-zero and directional accuracy near 50%. They reduce drawdown but give up most of
-the upside versus buy & hold. This is the honest comparison to report without
-overclaiming, and it is the result the consultation was about. The simplified
-pilot below is a separate configuration that removes the evolving structure and
-does not replace this table.
+The frozen configuration (B2, three one-rule components on `ma5`, `boll_b` and
+`ret_0` plus ex-dividend dummies) beats the zero forecast by +0.59% pooled RMSE
+skill, with 8 of 9 test years positive, and the difference is significant by
+Diebold–Mariano against both zero (p = 0.0024) and XGBoost (p = 0.0006); at
+α = 0.10 it is the only model left in the range-based model confidence set. The
+three earlier models remain worse than the zero forecast — DENFIS with the full
+13-feature rule base included. Trading still does not beat buy & hold on Sharpe
+(0.537 versus 1.113), and the 2026 holdout is only +0.14% RMSE skill, so the
+honest summary is: a small, statistically detectable forecast edge, not a
+profitable strategy. See `docs/freeze.md` and `docs/results_table.md`.
 
 The online extension is reported separately: pooled RMSE 0.012185 and Sharpe
 0.260, below frozen DENFIS on this run. DM comparisons are not significant;
@@ -75,8 +81,11 @@ validation-guaranteed; the intervals are wide and the test years were already
 inspected during the diagnostics. See `docs/return_pilot.md` and
 `docs/event_feature_pilot.md`. The 2026 holdout is the clean confirmation.
 
-DENFIS 2026 holdout remains reserved until the scheduled freeze. Baseline
-holdout artifacts predate this handoff and must not guide further tuning.
+The frozen B2 holdout was run once after the freeze: n = 209 (2026-01 to
+2026-10), RMSE 0.010140 versus 0.010154 for the zero forecast (+0.14% skill),
+directional accuracy 0.522, Sharpe 1.71 at 12% exposure. The skill is small and
+the Sharpe comes from a short, low-exposure window; neither guided any choice.
+Baseline holdout artifacts predate this handoff.
 
 ## Quick start
 
@@ -134,8 +143,8 @@ writing/                  # report drafts before notebook integration
 |---|---|
 | 2026-11-08 | Protocol frozen; data cached |
 | 2026-11-13 | All models run on all 9 folds (hard gate) |
-| 2026-11-15 22:00 | Results frozen |
-| 2026-11-16 | Dedicated writing day |
+| 2026-11-15 | B2 frozen; test and holdout run once |
+| 2026-11-16 | Method-line sections due; writing day |
 | 2026-11-18 12:00 | Submit (official deadline 23:59) |
 
 ## Reproducibility

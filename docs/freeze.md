@@ -67,3 +67,22 @@ Artifacts written by those commands:
   reason to revisit the configuration.
 - Any correction must be a documentation fix that does not alter a number, or a
   documented protocol change with a new freeze.
+
+## Post-freeze results (reported as computed)
+
+Run order: test 2017–2025, then the 2026 holdout, each once.
+
+| scope | n | RMSE | RMSE skill vs zero | MAE skill | DA | Sharpe | max DD | exposure |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| pooled test years | 2258 | 0.011904 | +0.59% | +0.38% | 0.515 | 0.537 | 27.8% | 41.5% |
+| 2026 holdout | 209 | 0.010140 | +0.14% | +0.11% | 0.522 | 1.712 | 8.8% | 12.0% |
+
+Per-fold test RMSE skill: +0.13%, +0.12%, +1.88%, +0.62%, −0.35%, +0.75%,
++0.02%, +0.64%, +1.61% (8 of 9 positive; r2f2 is the loss).
+
+Statistical description after the run (`docs/statistical_tests.md`):
+Diebold–Mariano against zero p = 0.0024 and against XGBoost p = 0.0006; B2 is
+the only model retained by the range-based model confidence set at α = 0.10.
+Trading Sharpe 0.537 remains below buy & hold (1.113). The holdout skill is
+small and its Sharpe comes from a short, 12%-exposure window; neither value
+changed any configuration.

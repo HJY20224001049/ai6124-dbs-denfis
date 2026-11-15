@@ -38,7 +38,7 @@ COLUMNS = [
 
 TRADING_COLUMNS = ["model", "n", "sharpe", "ann_ret", "max_dd", "turnover", "exposure"]
 
-MAIN_MODELS = ["denfis_frozen", "xgboost", "lstm"]
+MAIN_MODELS = ["denfis_b2", "denfis_frozen", "xgboost", "lstm"]
 NO_PREDICTION = "no_prediction"
 COMPARISON_COLUMNS = [
     "model",
@@ -266,7 +266,7 @@ def main() -> None:
         "",
         "## Holdout, 2026 Jan–Oct",
         "",
-        "Baseline holdout artifacts predate the method-line handoff. DENFIS holdout remains pending the scheduled freeze; this table must not guide tuning.",
+        "The frozen model (B2) was run once on this period after the recorded freeze and is reported whatever it shows; baseline holdout predictions predate the method line and are kept for reference. None of these numbers guided selection.",
         "",
         markdown_table(holdout),
         "",
