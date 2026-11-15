@@ -225,3 +225,30 @@ def test_source_only_selection_does_not_use_target_validation_labels():
     _, target_metrics = run_fold("scratch", factory, fold, frame, grid, seed=42)
     assert source_metrics["params"] == {"value": .001}
     assert target_metrics["params"] == {"value": -.01}
+
+
+def test_run_fold_accepts_a_custom_column_set():
+    """The B2 ensemble needs a scaler fitted on its own columns, not FEATURES."""
+    frame = _frame()
+    index = np.arange(len(frame))
+    frame["is_exdiv"] = (index % 50 == 0).astype(int)
+    frame["is_post_exdiv_1"] = (index % 50 == 1).astype(int)
+    folds = make_folds_from_frame(frame)
+    fold = get_fold(folds, "r1f1")
+    columns = ["ma5", "boll_b", "ret_0", "is_exdiv", "is_post_exdiv_1"]
+
+    class WidthModel(DummyModel):
+        def fit(self, X, y):
+            assert X.shape[1] == len(columns)
+            super().fit(X, y)
+
+        def predict(self, X):
+            assert X.shape[1] == len(columns)
+            return super().predict(X)
+
+    preds, metrics = run_fold(
+        "width", lambda params, seed: WidthModel(params, seed), fold, frame,
+        [{}], seed=1, columns=columns,
+    )
+    assert preds.shape[0] == len(fold.test_idx)
+    assert np.isfinite(metrics["rmse"])

@@ -126,13 +126,21 @@ def run_fold(
     tau_grid=TAU_GRID,
     sequence_len: int | None = None,
     selection_frame: pd.DataFrame | None = None,
+    columns: list[str] | None = None,
 ) -> tuple[pd.DataFrame, dict]:
-    """Run one fold and return the prediction frame plus a metrics dict."""
+    """Run one fold and return the prediction frame plus a metrics dict.
+
+    ``columns`` defaults to ``config.FEATURES``.  Models that use a different
+    input set (for example the B2 ensemble, which adds two ex-dividend dummies)
+    pass their own column list so the scaler is fitted on exactly those columns
+    inside the same training window.
+    """
     if sequence_len is not None and online:
         raise NotImplementedError("online sequence models are not supported")
     if selection_frame is not None and sequence_len is not None:
         raise NotImplementedError("separate selection market requires tabular inputs")
 
+    cols = FEATURES if columns is None else list(columns)
     selection_data = frame if selection_frame is None else selection_frame
     if len(selection_data) != len(frame) or not np.array_equal(
         selection_data["label_date"].to_numpy(), frame["label_date"].to_numpy()
@@ -145,14 +153,14 @@ def run_fold(
     y_all = frame[TARGET_COL].to_numpy(dtype=np.float64)
 
     # --- hyperparameter selection on the selection-train + validation years ---
-    scaler_select = fit_scaler(select_train[FEATURES])
+    scaler_select = fit_scaler(select_train[cols])
     if sequence_len is None:
-        X_select = transform_scaler(select_train[FEATURES], scaler_select)
+        X_select = transform_scaler(select_train[cols], scaler_select)
         y_select = select_train[TARGET_COL].to_numpy(dtype=np.float64)
-        X_val = transform_scaler(val[FEATURES], scaler_select)
+        X_val = transform_scaler(val[cols], scaler_select)
         y_val = val[TARGET_COL].to_numpy(dtype=np.float64)
     else:
-        full_select = transform_scaler(frame[FEATURES], scaler_select)
+        full_select = transform_scaler(frame[cols], scaler_select)
         X_select, select_valid = build_sequences(
             full_select, fold.select_train_idx, sequence_len
         )
@@ -202,15 +210,15 @@ def run_fold(
         final_params["epochs"] = int(best_epoch)
 
     # --- final fit on train + validation, scaler refit on that window ---
-    scaler_final = fit_scaler(final_train[FEATURES])
+    scaler_final = fit_scaler(final_train[cols])
     if sequence_len is None:
-        X_final = transform_scaler(final_train[FEATURES], scaler_final)
+        X_final = transform_scaler(final_train[cols], scaler_final)
         y_final = final_train[TARGET_COL].to_numpy(dtype=np.float64)
-        X_test = transform_scaler(test[FEATURES], scaler_final)
+        X_test = transform_scaler(test[cols], scaler_final)
         y_test = test[TARGET_COL].to_numpy(dtype=np.float64)
         test_meta = test
     else:
-        full_final = transform_scaler(frame[FEATURES], scaler_final)
+        full_final = transform_scaler(frame[cols], scaler_final)
         X_final, final_valid = build_sequences(
             full_final, fold.train_idx, sequence_len
         )
@@ -313,6 +321,7 @@ def run_model_on_folds(
     fold_ids: list[str] | None = None,
     cost_bps: float = COST_BPS,
     sequence_len: int | None = None,
+    columns: list[str] | None = None,
 ) -> pd.DataFrame:
     """Run a model over selected folds and refresh summary + manifest."""
     selected = [
@@ -337,6 +346,7 @@ def run_model_on_folds(
             online=online,
             cost_bps=cost_bps,
             sequence_len=sequence_len,
+            columns=columns,
         )
         save_fold_result(model_name, fold.fold_id, pred_frame, metrics)
         rows.append(metrics)

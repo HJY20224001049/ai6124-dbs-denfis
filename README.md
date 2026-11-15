@@ -98,6 +98,8 @@ python scripts/statistical_tests.py                 # docs/statistical_tests.md
 python scripts/leakage_audit.py                     # docs/leakage_audit.md
 python scripts/return_pilot.py                      # simplified models, original target
 python scripts/event_feature_pilot.py               # ex-dividend feature pilot
+python scripts/run_b2.py                            # B2 validation score (no test years)
+python scripts/fair_validation.py                   # baselines with inner early stopping
 ```
 
 The implemented `src/models/denfis.py` is exposed through

@@ -24,11 +24,22 @@ year (Y-1). The test years and the 2026 holdout are never indexed.
 The validation set is the only selection window here. The comparison with the
 LSTM is against its validation-selected configuration (+0.520% mean validation
 skill, 8/9 folds), which is itself a maximum over 16 candidates and therefore
-optimistic. A candidate is only worth freezing if it improves on the current
-three-feature + ex-dividend variant without relying on the test years.
+optimistic. That +0.520% also early-stops on the year it is scored; with the
+epoch count chosen inside the training window instead, the LSTM scores −1.237%
+(3/9) and XGBoost +0.021% (4/9) — see `docs/fair_validation.md`. On the same
+fair footing the ordering is B2 > XGBoost > LSTM > zero, but B2's own number is
+still the best of sixteen variants chosen on validation, so the 2026 holdout
+remains the only clean confirmation. A candidate is only worth freezing if it
+improves on the current three-feature + ex-dividend variant without relying on
+the test years.
 
 ## Reproduction
 
 ```bash
 python scripts/validation_candidates.py
+python scripts/run_b2.py          # same B2 row through the shared CV model
 ```
+
+`scripts/run_b2.py` wraps B2 as a model (`src/models/ensemble.py`) and
+reproduces the `B2_equal3_exdiv` row above from the shared pipeline. It refuses
+to touch the test years or the holdout until `--after-freeze` is passed.
