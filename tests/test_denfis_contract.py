@@ -115,6 +115,44 @@ def test_one_rule_rls_matches_regularised_least_squares():
     assert np.linalg.eigvalsh(model.cov_[0]).min() > 0
 
 
+def test_one_rule_predictions_match_closed_form_ridge():
+    """A single rule with lam=1 is exactly ridge with the covariance prior.
+
+    The rule covariance starts at 100*I, i.e. a prior precision of 0.01, so the
+    recursive update terminates at the closed-form ridge solution.  This is the
+    audit that separates "a bug" from "a deliberately regularised linear fit".
+    """
+    rng = np.random.default_rng(11)
+    X = rng.normal(size=(300, 3))
+    y = 0.02 * X[:, 0] - 0.01 * X[:, 1] + rng.normal(scale=0.01, size=300)
+    model = DENFIS(max_rules=1, lam=1, prediction_clip=None)
+    model.fit(X[:200], y[:200])
+    phi = np.c_[np.ones(200), X[:200]]
+    expected = np.linalg.solve(phi.T @ phi + 0.01 * np.eye(4), phi.T @ y[:200])
+    predict_phi = np.c_[np.ones(100), X[200:]]
+    np.testing.assert_allclose(model.predict(X[200:]), predict_phi @ expected, atol=1e-12)
+
+
+def test_one_rule_is_indistinguishable_from_ols_at_daily_return_scale():
+    """On a realistic training window the prior moves OLS by well under 0.01%.
+
+    With n=800 the ridge term adds 0.01 to a Gram matrix of order 800, so the
+    fitted function stays within 1e-4 of the standard deviation of next-day
+    returns; the equivalence in the method chapter is therefore not a claim that
+    the model ignores the prior, only that the prior is numerically negligible
+    here.
+    """
+    rng = np.random.default_rng(12)
+    X = rng.normal(size=(1000, 3))
+    y = 0.01 * X[:, 0] + rng.normal(scale=0.012, size=1000)
+    model = DENFIS(max_rules=1, lam=1, prediction_clip=None)
+    model.fit(X[:800], y[:800])
+    phi = np.c_[np.ones(800), X[:800]]
+    ols = np.linalg.lstsq(phi, y[:800], rcond=None)[0]
+    gap = np.max(np.abs(model.predict(X[800:]) - np.c_[np.ones(200), X[800:]] @ ols))
+    assert gap < 1e-4 * np.std(y[800:])
+
+
 def test_incremental_merge_screen_matches_full_pairwise_reference():
     class FullScan(DENFIS):
         def partial_fit(self, x, y):
