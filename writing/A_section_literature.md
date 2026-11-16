@@ -1,4 +1,5 @@
 ## 3. Literature review
+
 ### Adaptive fuzzy models and evolving structure
 
 A neuro-fuzzy model combines a fuzzy representation of local input regions with
@@ -32,7 +33,7 @@ inference for time-series prediction. The original work covers online and
 offline formulations and dynamically selected activated rules. The implementation adopts the
 broader ECM/TSK/local-estimation approach, while following this project's fixed
 Gaussian and weighted-RLS protocol. The implemented model is therefore described
-as a DENFIS-inspired variant and list its deviations. The contribution relative to the established DENFIS
+as a DENFIS-inspired variant, with its deviations explicitly listed. The contribution relative to the established DENFIS
 algorithm is an independently written,
 bounded implementation and a controlled comparison of its frozen and adapting
 forms on this dataset.
